@@ -11,17 +11,15 @@ interface StatCardProps {
 
 export function StatCard({ title, value, change, trend, icon: Icon, className = "" }: StatCardProps) {
   return (
-    <div className={`rounded-xl border border-border bg-card p-5 ${className}`}>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-muted-foreground">{title}</span>
-        <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-surface">
-          <Icon className="w-4 h-4 text-muted-foreground" />
-        </div>
+    <div className={`rounded-lg bg-card border border-border p-5 ${className}`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[13px] text-muted-foreground">{title}</span>
+        <Icon className="w-4 h-4 text-muted-foreground/50" />
       </div>
-      <div className="flex items-end gap-3">
-        <span className="text-2xl font-semibold tracking-tight text-card-foreground">{value}</span>
+      <div className="flex items-baseline gap-2">
+        <span className="text-[22px] font-semibold tracking-tight text-foreground">{value}</span>
         <span
-          className={`flex items-center gap-1 text-xs font-medium mb-1 ${
+          className={`flex items-center gap-0.5 text-[11px] font-medium ${
             trend === "up" ? "text-success" : "text-destructive"
           }`}
         >
