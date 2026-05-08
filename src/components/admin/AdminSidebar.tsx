@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -18,7 +19,7 @@ import {
 interface NavItem {
   icon: LucideIcon;
   label: string;
-  active?: boolean;
+  to?: string;
   badge?: number;
 }
 
@@ -31,14 +32,14 @@ const navGroups: NavGroup[] = [
   {
     label: "Overview",
     items: [
-      { icon: LayoutDashboard, label: "Dashboard", active: true },
-      { icon: BarChart3, label: "Analytics" },
+      { icon: LayoutDashboard, label: "Dashboard", to: "/" },
+      { icon: BarChart3, label: "Analytics", to: "/analytics" },
     ],
   },
   {
     label: "Commerce",
     items: [
-      { icon: ShoppingCart, label: "Orders", badge: 12 },
+      { icon: ShoppingCart, label: "Orders", to: "/orders", badge: 12 },
       { icon: Package, label: "Products" },
       { icon: Tag, label: "Discounts" },
     ],
@@ -58,6 +59,7 @@ const navGroups: NavGroup[] = [
 
 export function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
     <aside
@@ -65,7 +67,6 @@ export function AdminSidebar() {
         collapsed ? "w-16" : "w-56"
       }`}
     >
-      {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
         <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center">
           <span className="text-[11px] font-bold text-background">S</span>
@@ -75,7 +76,6 @@ export function AdminSidebar() {
         )}
       </div>
 
-      {/* Nav */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
         {navGroups.map((group) => (
           <div key={group.label}>
@@ -85,15 +85,10 @@ export function AdminSidebar() {
               </p>
             )}
             <ul className="space-y-px">
-              {group.items.map((item) => (
-                <li key={item.label}>
-                  <button
-                    className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
-                      item.active
-                        ? "bg-accent text-foreground font-medium"
-                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                    } ${collapsed ? "justify-center" : ""}`}
-                  >
+              {group.items.map((item) => {
+                const active = item.to ? pathname === item.to : false;
+                const content = (
+                  <>
                     <item.icon className="w-[15px] h-[15px] shrink-0" />
                     {!collapsed && (
                       <>
@@ -105,15 +100,28 @@ export function AdminSidebar() {
                         )}
                       </>
                     )}
-                  </button>
-                </li>
-              ))}
+                  </>
+                );
+                const cls = `flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
+                  active
+                    ? "bg-accent text-foreground font-medium"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                } ${collapsed ? "justify-center" : ""}`;
+                return (
+                  <li key={item.label}>
+                    {item.to ? (
+                      <Link to={item.to} className={cls}>{content}</Link>
+                    ) : (
+                      <button className={cls}>{content}</button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
       </nav>
 
-      {/* Bottom actions */}
       <div className="border-t border-sidebar-border p-2 space-y-px">
         <button
           className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] text-muted-foreground hover:bg-accent hover:text-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
@@ -129,7 +137,6 @@ export function AdminSidebar() {
         </button>
       </div>
 
-      {/* Collapse */}
       <div className="border-t border-sidebar-border p-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
