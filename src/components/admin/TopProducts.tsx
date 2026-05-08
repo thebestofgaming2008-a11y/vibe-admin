@@ -8,34 +8,19 @@ const products = [
 
 export function TopProducts() {
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h3 className="text-sm font-medium text-card-foreground">Top Products</h3>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Best sellers this month</p>
-        </div>
-      </div>
+    <div className="rounded-lg bg-card border border-border p-6">
+      <h3 className="text-[13px] font-medium text-foreground mb-5">Top Products</h3>
 
       <div className="space-y-4">
-        {products.map((product, i) => (
+        {products.map((product) => (
           <div key={product.name} className="group">
             <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-center gap-2.5">
-                <span className="text-[11px] font-mono text-muted-foreground w-4">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="text-sm text-card-foreground group-hover:text-primary transition-colors">
-                  {product.name}
-                </span>
-              </div>
-              <div className="flex items-center gap-4 text-[13px]">
-                <span className="text-muted-foreground">{product.sales} sales</span>
-                <span className="font-medium text-card-foreground w-20 text-right">{product.revenue}</span>
-              </div>
+              <span className="text-[13px] text-foreground">{product.name}</span>
+              <span className="text-[12px] text-muted-foreground font-mono">{product.revenue}</span>
             </div>
-            <div className="ml-6.5 h-1.5 rounded-full bg-surface overflow-hidden">
+            <div className="h-1 rounded-full bg-surface overflow-hidden">
               <div
-                className="h-full rounded-full bg-primary/60 transition-all group-hover:bg-primary"
+                className="h-full rounded-full bg-foreground/15 group-hover:bg-foreground/25 transition-colors"
                 style={{ width: `${product.progress}%` }}
               />
             </div>

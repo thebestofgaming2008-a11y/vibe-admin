@@ -6,63 +6,52 @@ const orders = [
   { id: "#3417", customer: "Lisa Rodriguez", product: "Monitor Light Bar", amount: "$54.99", status: "Pending", time: "3h ago" },
 ];
 
-const statusStyles: Record<string, string> = {
-  Completed: "bg-success/15 text-success",
-  Processing: "bg-info/15 text-info",
-  Shipped: "bg-primary/15 text-primary",
-  Pending: "bg-muted text-muted-foreground",
+const statusDot: Record<string, string> = {
+  Completed: "bg-success",
+  Processing: "bg-info",
+  Shipped: "bg-foreground",
+  Pending: "bg-muted-foreground/40",
 };
 
 export function RecentOrders() {
   return (
-    <div className="rounded-xl border border-border bg-card">
-      <div className="flex items-center justify-between p-6 pb-4">
-        <div>
-          <h3 className="text-sm font-medium text-card-foreground">Recent Orders</h3>
-          <p className="text-[13px] text-muted-foreground mt-0.5">Latest transactions</p>
-        </div>
-        <button className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
-          View all
+    <div className="rounded-lg bg-card border border-border">
+      <div className="flex items-center justify-between px-6 py-4">
+        <h3 className="text-[13px] font-medium text-foreground">Recent Orders</h3>
+        <button className="text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+          View all →
         </button>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="border-t border-border">
-              <th className="text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3">Order</th>
-              <th className="text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3">Customer</th>
-              <th className="text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3 hidden sm:table-cell">Product</th>
-              <th className="text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3">Amount</th>
-              <th className="text-left text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3">Status</th>
-              <th className="text-right text-[11px] font-medium uppercase tracking-wider text-muted-foreground px-6 py-3 hidden md:table-cell">Time</th>
+      <table className="w-full">
+        <thead>
+          <tr className="border-t border-border">
+            <th className="text-left text-[11px] font-normal text-muted-foreground px-6 py-2.5">Order</th>
+            <th className="text-left text-[11px] font-normal text-muted-foreground px-6 py-2.5">Customer</th>
+            <th className="text-left text-[11px] font-normal text-muted-foreground px-6 py-2.5 hidden sm:table-cell">Product</th>
+            <th className="text-right text-[11px] font-normal text-muted-foreground px-6 py-2.5">Amount</th>
+            <th className="text-left text-[11px] font-normal text-muted-foreground px-6 py-2.5">Status</th>
+            <th className="text-right text-[11px] font-normal text-muted-foreground px-6 py-2.5 hidden md:table-cell">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {orders.map((order) => (
+            <tr key={order.id} className="border-t border-border hover:bg-accent/50 transition-colors">
+              <td className="px-6 py-3 text-[13px] font-medium text-foreground font-mono">{order.id}</td>
+              <td className="px-6 py-3 text-[13px] text-foreground">{order.customer}</td>
+              <td className="px-6 py-3 text-[13px] text-muted-foreground hidden sm:table-cell">{order.product}</td>
+              <td className="px-6 py-3 text-[13px] font-medium text-foreground text-right font-mono">{order.amount}</td>
+              <td className="px-6 py-3">
+                <span className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusDot[order.status] || ""}`} />
+                  {order.status}
+                </span>
+              </td>
+              <td className="px-6 py-3 text-[12px] text-muted-foreground text-right hidden md:table-cell">{order.time}</td>
             </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} className="border-t border-border hover:bg-surface/50 transition-colors">
-                <td className="px-6 py-3.5 text-sm font-medium text-card-foreground">{order.id}</td>
-                <td className="px-6 py-3.5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-surface flex items-center justify-center text-[11px] font-medium text-surface-foreground">
-                      {order.customer.split(" ").map((n) => n[0]).join("")}
-                    </div>
-                    <span className="text-sm text-card-foreground">{order.customer}</span>
-                  </div>
-                </td>
-                <td className="px-6 py-3.5 text-sm text-muted-foreground hidden sm:table-cell">{order.product}</td>
-                <td className="px-6 py-3.5 text-sm font-medium text-card-foreground text-right">{order.amount}</td>
-                <td className="px-6 py-3.5">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium ${statusStyles[order.status] || ""}`}>
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-6 py-3.5 text-[13px] text-muted-foreground text-right hidden md:table-cell">{order.time}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

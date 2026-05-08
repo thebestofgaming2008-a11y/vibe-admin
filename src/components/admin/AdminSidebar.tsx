@@ -8,15 +8,15 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Store,
   Tag,
   MessageSquare,
   Bell,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 
 interface NavItem {
-  icon: typeof LayoutDashboard;
+  icon: LucideIcon;
   label: string;
   active?: boolean;
   badge?: number;
@@ -52,9 +52,7 @@ const navGroups: NavGroup[] = [
   },
   {
     label: "System",
-    items: [
-      { icon: Settings, label: "Settings" },
-    ],
+    items: [{ icon: Settings, label: "Settings" }],
   },
 ];
 
@@ -63,50 +61,45 @@ export function AdminSidebar() {
 
   return (
     <aside
-      className={`flex flex-col bg-sidebar-bg border-r border-sidebar-border transition-all duration-300 ${
-        collapsed ? "w-[68px]" : "w-[240px]"
+      className={`flex flex-col bg-sidebar-bg border-r border-sidebar-border transition-all duration-200 shrink-0 ${
+        collapsed ? "w-16" : "w-56"
       }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 h-16 border-b border-sidebar-border">
-        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary">
-          <Store className="w-4 h-4 text-primary-foreground" />
+      <div className="flex items-center gap-2.5 px-4 h-14 border-b border-sidebar-border">
+        <div className="w-7 h-7 rounded-md bg-foreground flex items-center justify-center">
+          <span className="text-[11px] font-bold text-background">S</span>
         </div>
         {!collapsed && (
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-semibold text-sidebar-accent-foreground truncate">
-              My Store
-            </span>
-            <span className="text-[11px] text-sidebar-foreground truncate">Admin Panel</span>
-          </div>
+          <span className="text-[13px] font-semibold text-foreground truncate">Store</span>
         )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-4 px-2 space-y-6">
+      <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-5">
         {navGroups.map((group) => (
           <div key={group.label}>
             {!collapsed && (
-              <p className="px-3 mb-2 text-[11px] font-medium uppercase tracking-wider text-sidebar-foreground">
+              <p className="px-2 mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
                 {group.label}
               </p>
             )}
-            <ul className="space-y-0.5">
+            <ul className="space-y-px">
               {group.items.map((item) => (
                 <li key={item.label}>
                   <button
-                    className={`flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm transition-colors ${
+                    className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
                       item.active
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        ? "bg-accent text-foreground font-medium"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     } ${collapsed ? "justify-center" : ""}`}
                   >
-                    <item.icon className="w-4 h-4 shrink-0" />
+                    <item.icon className="w-[15px] h-[15px] shrink-0" />
                     {!collapsed && (
                       <>
-                        <span className="flex-1 text-left truncate">{item.label}</span>
+                        <span className="flex-1 text-left">{item.label}</span>
                         {item.badge && (
-                          <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[11px] font-medium">
+                          <span className="text-[10px] font-medium text-muted-foreground bg-surface px-1.5 py-0.5 rounded">
                             {item.badge}
                           </span>
                         )}
@@ -120,25 +113,33 @@ export function AdminSidebar() {
         ))}
       </nav>
 
-      {/* Bottom */}
-      <div className="border-t border-sidebar-border p-2 space-y-0.5">
-        <button className={`flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors ${collapsed ? "justify-center" : ""}`}>
-          <Bell className="w-4 h-4 shrink-0" />
+      {/* Bottom actions */}
+      <div className="border-t border-sidebar-border p-2 space-y-px">
+        <button
+          className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] text-muted-foreground hover:bg-accent hover:text-foreground transition-colors ${collapsed ? "justify-center" : ""}`}
+        >
+          <Bell className="w-[15px] h-[15px]" />
           {!collapsed && <span>Notifications</span>}
         </button>
-        <button className={`flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent hover:text-destructive transition-colors ${collapsed ? "justify-center" : ""}`}>
-          <LogOut className="w-4 h-4 shrink-0" />
+        <button
+          className={`flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] text-muted-foreground hover:bg-accent hover:text-destructive transition-colors ${collapsed ? "justify-center" : ""}`}
+        >
+          <LogOut className="w-[15px] h-[15px]" />
           {!collapsed && <span>Log out</span>}
         </button>
       </div>
 
-      {/* Collapse toggle */}
+      {/* Collapse */}
       <div className="border-t border-sidebar-border p-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center w-full rounded-lg py-2 text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+          className="flex items-center justify-center w-full rounded-md py-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
         >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {collapsed ? (
+            <ChevronRight className="w-3.5 h-3.5" />
+          ) : (
+            <ChevronLeft className="w-3.5 h-3.5" />
+          )}
         </button>
       </div>
     </aside>
