@@ -15,7 +15,19 @@ import {
   LogOut,
 } from "lucide-react";
 
-const navGroups = [
+interface NavItem {
+  icon: typeof LayoutDashboard;
+  label: string;
+  active?: boolean;
+  badge?: number;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
   {
     label: "Overview",
     items: [
