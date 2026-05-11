@@ -16,12 +16,13 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { useOrders } from "@/lib/orders-store";
 
 interface NavItem {
   icon: LucideIcon;
   label: string;
-  to?: string;
-  badge?: number;
+  to: string;
+  badgeKey?: "orders" | "reviews";
 }
 
 interface NavGroup {
@@ -40,21 +41,21 @@ const navGroups: NavGroup[] = [
   {
     label: "Commerce",
     items: [
-      { icon: ShoppingCart, label: "Orders", to: "/orders", badge: 12 },
-      { icon: Package, label: "Products" },
-      { icon: Tag, label: "Discounts" },
+      { icon: ShoppingCart, label: "Orders", to: "/orders", badgeKey: "orders" },
+      { icon: Package, label: "Products", to: "/products" },
+      { icon: Tag, label: "Discounts", to: "/discounts" },
     ],
   },
   {
     label: "People",
     items: [
-      { icon: Users, label: "Customers" },
-      { icon: MessageSquare, label: "Reviews", badge: 3 },
+      { icon: Users, label: "Customers", to: "/customers" },
+      { icon: MessageSquare, label: "Reviews", to: "/reviews", badgeKey: "reviews" },
     ],
   },
   {
     label: "System",
-    items: [{ icon: Settings, label: "Settings" }],
+    items: [{ icon: Settings, label: "Settings", to: "/settings" }],
   },
 ];
 
@@ -66,6 +67,11 @@ interface AdminSidebarProps {
 export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const orders = useOrders();
+  const badges = {
+    orders: orders.filter((o) => o.status === "unshipped" || o.status === "shipped_no_tracking").length,
+    reviews: 3,
+  };
 
   return (
     <>
