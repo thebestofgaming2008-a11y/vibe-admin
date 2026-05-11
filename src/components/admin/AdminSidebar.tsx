@@ -112,23 +112,9 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
               )}
               <ul className="space-y-px">
                 {group.items.map((item) => {
-                  const active = item.to ? pathname === item.to : false;
+                  const active = pathname === item.to;
                   const showLabels = !collapsed || mobileOpen;
-                  const content = (
-                    <>
-                      <item.icon className="w-[15px] h-[15px] shrink-0" />
-                      {showLabels && (
-                        <>
-                          <span className="flex-1 text-left">{item.label}</span>
-                          {item.badge && (
-                            <span className="text-[10px] font-medium text-muted-foreground bg-surface px-1.5 py-0.5 rounded">
-                              {item.badge}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </>
-                  );
+                  const badge = item.badgeKey ? badges[item.badgeKey] : 0;
                   const cls = `flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
                     active
                       ? "bg-accent text-foreground font-medium"
@@ -136,13 +122,19 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
                   } ${!showLabels ? "justify-center" : ""}`;
                   return (
                     <li key={item.label}>
-                      {item.to ? (
-                        <Link to={item.to} className={cls} onClick={onMobileClose}>
-                          {content}
-                        </Link>
-                      ) : (
-                        <button className={cls}>{content}</button>
-                      )}
+                      <Link to={item.to} className={cls} onClick={onMobileClose}>
+                        <item.icon className="w-[15px] h-[15px] shrink-0" />
+                        {showLabels && (
+                          <>
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {badge > 0 && (
+                              <span className="text-[10px] font-medium text-muted-foreground bg-surface px-1.5 py-0.5 rounded">
+                                {badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Link>
                     </li>
                   );
                 })}
