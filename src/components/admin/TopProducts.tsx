@@ -8,7 +8,7 @@ const products = [
 
 export function TopProducts() {
   return (
-    <div className="rounded-lg bg-card border border-border p-6">
+    <div className="rounded-lg bg-card border border-border p-5 sm:p-6">
       <h3 className="text-[13px] font-medium text-foreground mb-5">Top Products</h3>
 
       <div className="space-y-4">
