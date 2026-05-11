@@ -1,17 +1,25 @@
-import { orders, statusMeta } from "@/lib/orders-data";
+import { Link } from "@tanstack/react-router";
+import { useOrders, statusMeta } from "@/lib/orders-store";
+
+function fmtAmount(n: number) {
+  return `$${n.toFixed(2)}`;
+}
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 export function RecentOrders() {
+  const orders = useOrders();
   const recent = orders.slice(0, 6);
   return (
     <div className="rounded-lg bg-card border border-border overflow-hidden">
       <div className="flex items-center justify-between px-4 sm:px-6 py-4">
         <h3 className="text-[13px] font-medium text-foreground">Recent Orders</h3>
-        <button className="text-[12px] text-muted-foreground hover:text-foreground transition-colors">
+        <Link to="/orders" className="text-[12px] text-muted-foreground hover:text-foreground transition-colors">
           View all →
-        </button>
+        </Link>
       </div>
 
-      {/* Desktop / tablet */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full min-w-[560px]">
           <thead>
@@ -32,14 +40,14 @@ export function RecentOrders() {
                   <td className="px-6 py-3 text-[13px] font-medium text-foreground font-mono">{order.id}</td>
                   <td className="px-6 py-3 text-[13px] text-foreground">{order.customer}</td>
                   <td className="px-6 py-3 text-[13px] text-muted-foreground hidden md:table-cell">{order.product}</td>
-                  <td className="px-6 py-3 text-[13px] font-medium text-foreground text-right font-mono">{order.amount}</td>
+                  <td className="px-6 py-3 text-[13px] font-medium text-foreground text-right font-mono">{fmtAmount(order.amount)}</td>
                   <td className="px-6 py-3">
                     <span className="inline-flex items-center gap-1.5 text-[12px] text-muted-foreground whitespace-nowrap">
                       <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
                       {meta.label}
                     </span>
                   </td>
-                  <td className="px-6 py-3 text-[12px] text-muted-foreground text-right hidden lg:table-cell">{order.date}</td>
+                  <td className="px-6 py-3 text-[12px] text-muted-foreground text-right hidden lg:table-cell">{fmtDate(order.date)}</td>
                 </tr>
               );
             })}
@@ -47,7 +55,6 @@ export function RecentOrders() {
         </table>
       </div>
 
-      {/* Mobile list */}
       <ul className="sm:hidden border-t border-border divide-y divide-border">
         {recent.map((order) => {
           const meta = statusMeta[order.status];
@@ -66,8 +73,8 @@ export function RecentOrders() {
                   <p className="text-[12px] text-muted-foreground truncate">{order.product}</p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-[13px] font-semibold text-foreground font-mono">{order.amount}</p>
-                  <p className="text-[11px] text-muted-foreground">{order.date}</p>
+                  <p className="text-[13px] font-semibold text-foreground font-mono">{fmtAmount(order.amount)}</p>
+                  <p className="text-[11px] text-muted-foreground">{fmtDate(order.date)}</p>
                 </div>
               </div>
             </li>

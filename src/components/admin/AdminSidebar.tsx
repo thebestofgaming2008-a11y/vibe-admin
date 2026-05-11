@@ -16,12 +16,13 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { useOrders } from "@/lib/orders-store";
 
 interface NavItem {
   icon: LucideIcon;
   label: string;
-  to?: string;
-  badge?: number;
+  to: string;
+  badgeKey?: "orders" | "reviews";
 }
 
 interface NavGroup {
@@ -40,21 +41,21 @@ const navGroups: NavGroup[] = [
   {
     label: "Commerce",
     items: [
-      { icon: ShoppingCart, label: "Orders", to: "/orders", badge: 12 },
-      { icon: Package, label: "Products" },
-      { icon: Tag, label: "Discounts" },
+      { icon: ShoppingCart, label: "Orders", to: "/orders", badgeKey: "orders" },
+      { icon: Package, label: "Products", to: "/products" },
+      { icon: Tag, label: "Discounts", to: "/discounts" },
     ],
   },
   {
     label: "People",
     items: [
-      { icon: Users, label: "Customers" },
-      { icon: MessageSquare, label: "Reviews", badge: 3 },
+      { icon: Users, label: "Customers", to: "/customers" },
+      { icon: MessageSquare, label: "Reviews", to: "/reviews", badgeKey: "reviews" },
     ],
   },
   {
     label: "System",
-    items: [{ icon: Settings, label: "Settings" }],
+    items: [{ icon: Settings, label: "Settings", to: "/settings" }],
   },
 ];
 
@@ -66,6 +67,11 @@ interface AdminSidebarProps {
 export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const orders = useOrders();
+  const badges = {
+    orders: orders.filter((o) => o.status === "unshipped" || o.status === "shipped_no_tracking").length,
+    reviews: 3,
+  };
 
   return (
     <>
@@ -112,23 +118,9 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
               )}
               <ul className="space-y-px">
                 {group.items.map((item) => {
-                  const active = item.to ? pathname === item.to : false;
+                  const active = pathname === item.to;
                   const showLabels = !collapsed || mobileOpen;
-                  const content = (
-                    <>
-                      <item.icon className="w-[15px] h-[15px] shrink-0" />
-                      {showLabels && (
-                        <>
-                          <span className="flex-1 text-left">{item.label}</span>
-                          {item.badge && (
-                            <span className="text-[10px] font-medium text-muted-foreground bg-surface px-1.5 py-0.5 rounded">
-                              {item.badge}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </>
-                  );
+                  const badge = item.badgeKey ? badges[item.badgeKey] : 0;
                   const cls = `flex items-center gap-2.5 w-full rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${
                     active
                       ? "bg-accent text-foreground font-medium"
@@ -136,13 +128,19 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
                   } ${!showLabels ? "justify-center" : ""}`;
                   return (
                     <li key={item.label}>
-                      {item.to ? (
-                        <Link to={item.to} className={cls} onClick={onMobileClose}>
-                          {content}
-                        </Link>
-                      ) : (
-                        <button className={cls}>{content}</button>
-                      )}
+                      <Link to={item.to} className={cls} onClick={onMobileClose}>
+                        <item.icon className="w-[15px] h-[15px] shrink-0" />
+                        {showLabels && (
+                          <>
+                            <span className="flex-1 text-left">{item.label}</span>
+                            {badge > 0 && (
+                              <span className="text-[10px] font-medium text-muted-foreground bg-surface px-1.5 py-0.5 rounded">
+                                {badge}
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </Link>
                     </li>
                   );
                 })}
