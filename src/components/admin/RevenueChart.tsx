@@ -12,13 +12,13 @@ const maxRevenue = Math.max(...data.map((d) => d.revenue));
 
 export function RevenueChart() {
   return (
-    <div className="rounded-lg bg-card border border-border p-6">
-      <div className="flex items-center justify-between mb-8">
+    <div className="rounded-lg bg-card border border-border p-5 sm:p-6">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
         <h3 className="text-[13px] font-medium text-foreground">Revenue</h3>
         <span className="text-[11px] text-muted-foreground">Last 7 months</span>
       </div>
 
-      <div className="flex items-end gap-2 h-40">
+      <div className="flex items-end gap-1.5 sm:gap-2 h-32 sm:h-40">
         {data.map((item) => {
           const height = (item.revenue / maxRevenue) * 100;
           return (
