@@ -14,15 +14,17 @@ import {
   Bell,
   LogOut,
   X,
+  Truck,
   type LucideIcon,
 } from "lucide-react";
+import { useShipping, isStale } from "@/lib/shipping-store";
 import { useOrders } from "@/lib/orders-store";
 
 interface NavItem {
   icon: LucideIcon;
   label: string;
   to: string;
-  badgeKey?: "orders" | "reviews";
+  badgeKey?: "orders" | "reviews" | "shipping";
 }
 
 interface NavGroup {
@@ -43,6 +45,7 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: ShoppingCart, label: "Orders", to: "/orders", badgeKey: "orders" },
       { icon: Package, label: "Products", to: "/products" },
+      { icon: Truck, label: "Shipping", to: "/shipping", badgeKey: "shipping" },
       { icon: Tag, label: "Discounts", to: "/discounts" },
     ],
   },
@@ -68,9 +71,11 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
   const [collapsed, setCollapsed] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const orders = useOrders();
+  const carriers = useShipping();
   const badges = {
     orders: orders.filter((o) => o.status === "unshipped" || o.status === "shipped_no_tracking").length,
     reviews: 3,
+    shipping: carriers.filter((c) => isStale(c.lastUpdated)).length,
   };
 
   return (
