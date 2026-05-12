@@ -156,10 +156,34 @@ export const topProductsData = [
   { name: "Monitor Light Bar", sales: 98, revenue: 5390 },
 ];
 
-export const trafficSources = [
-  { name: "Direct", value: 42 },
-  { name: "Organic search", value: 28 },
-  { name: "Email", value: 16 },
-  { name: "Social", value: 9 },
-  { name: "Referral", value: 5 },
+// Instagram is the primary acquisition channel — break it down by surface
+export const instagramSources = [
+  { name: "Profile link in bio", value: 38, orders: 142, note: "Linktree / direct" },
+  { name: "Story link stickers", value: 24, orders: 89, note: "24h CTAs" },
+  { name: "Reels (organic)", value: 18, orders: 67, note: "Discoverability" },
+  { name: "DM conversions", value: 11, orders: 41, note: "Direct messages" },
+  { name: "Paid promotions", value: 6, orders: 22, note: "Boosted posts" },
+  { name: "Influencer reposts", value: 3, orders: 11, note: "UGC / collabs" },
+];
+
+// Repeat customer cohort — useful KPI for any small webshop
+export const repeatCustomerData = {
+  newCustomers: 218,
+  returning: 96,
+  repeatRate: 30.6, // %
+  avgOrdersPerCustomer: 1.42,
+  topRepeat: [
+    { name: "Priya Patel", orders: 6, spent: 612 },
+    { name: "Marco Rossi", orders: 4, spent: 388 },
+    { name: "Sarah Chen", orders: 4, spent: 519 },
+    { name: "Yuki Tanaka", orders: 3, spent: 238 },
+  ],
+};
+
+// Best post performance for the period — content that actually drove sales
+export const topInstagramPosts = [
+  { type: "Reel", caption: "Unboxing — Hardcover Edition", reach: 48200, orders: 41, cvr: 0.085 },
+  { type: "Story", caption: "Flash sale 24h ⏳", reach: 12800, orders: 28, cvr: 0.219 },
+  { type: "Post", caption: "New arrivals carousel", reach: 21400, orders: 17, cvr: 0.079 },
+  { type: "Reel", caption: "Behind the scenes", reach: 33600, orders: 14, cvr: 0.042 },
 ];
