@@ -12,11 +12,11 @@ import {
   type Carrier,
   type Zone,
 } from "@/lib/shipping-store";
-import { useProducts, productsActions } from "@/lib/products-store";
+import { useProducts } from "@/lib/products-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AlertTriangle, RefreshCcw, Calculator, CheckCircle2, BellRing } from "lucide-react";
+import { RefreshCcw, Calculator, BellRing } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/shipping")({
