@@ -12,14 +12,35 @@ export interface ProductVariant {
   heightCm: number;
 }
 
+export interface ProductOption {
+  name: string; // e.g. "Size", "Color"
+  values: string[];
+}
+
+export type ConfidenceLevel = "unreviewed" | "estimated" | "verified";
+
 export interface Product {
   id: string;
   name: string;
+  slug?: string;
+  sku?: string;
   category: string;
   description: string;
   basePrice: number;
+  salePrice?: number;
+  badge?: string; // "New", "Sale", "Bestseller"
+  author?: string;
+  publisher?: string;
+  language?: string;
+  imageUrl?: string;
   active: boolean;
   variants: ProductVariant[];
+  options?: ProductOption[];
+  tags?: string[];
+  family?: string;
+  familyLabel?: string;
+  confidence?: ConfidenceLevel;
+  weightSourceUrl?: string;
   createdAt: string;
 }
 
