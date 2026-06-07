@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { ProductEditor } from "@/components/admin/ProductEditor";
 import {
   useProducts,
   productsActions,
   totalStock,
   priceRange,
   type Product,
-  type ProductVariant,
 } from "@/lib/products-store";
 import {
   Plus, Package, Pencil, Trash2, Search, Upload, Minus,
