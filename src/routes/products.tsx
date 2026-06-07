@@ -228,109 +228,14 @@ function ProductsPage() {
         </ul>
       </div>
 
-      {adding && <ProductDialog onClose={() => setAdding(false)} />}
-      {editing && <ProductDialog product={editing} onClose={() => setEditing(null)} />}
+      <ProductEditor open={adding} onClose={() => setAdding(false)} />
+      <ProductEditor
+        open={!!editing}
+        product={editing ?? undefined}
+        onClose={() => setEditing(null)}
+      />
       {bulkOpen && <BulkAddDialog onClose={() => setBulkOpen(false)} />}
     </AdminShell>
-  );
-}
-
-function ProductDialog({ product, onClose }: { product?: Product; onClose: () => void }) {
-  const isEdit = !!product;
-  const [name, setName] = useState(product?.name ?? "");
-  const [category, setCategory] = useState(product?.category ?? "Books");
-  const [description, setDescription] = useState(product?.description ?? "");
-  const [basePrice, setBasePrice] = useState(product?.basePrice ?? 0);
-  const [variants, setVariants] = useState<Omit<ProductVariant, "id">[]>(
-    product?.variants.map(({ id: _id, ...v }) => v) ?? [
-      { name: "Default", sku: "", price: 0, stock: 0, weightGrams: 300, lengthCm: 20, widthCm: 13, heightCm: 2 },
-    ],
-  );
-
-  function save() {
-    if (!name.trim()) return toast.error("Name is required");
-    if (isEdit && product) {
-      productsActions.updateProduct(product.id, { name, category, description, basePrice });
-      // sync variants: update existing in order, add new ones; for simplicity replace fully
-      product.variants.forEach((v) => productsActions.deleteVariant(product.id, v.id));
-      variants.forEach((v) => productsActions.addVariant(product.id, v));
-      toast.success("Product updated");
-    } else {
-      productsActions.addProduct({ name, category, description, basePrice, active: true, variants: variants.map((v) => ({ ...v, id: Math.random().toString(36).slice(2, 9) })) });
-      toast.success("Product added");
-    }
-    onClose();
-  }
-
-  return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit product" : "Add product"}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <Label className="text-[12px]">Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} />
-            </div>
-            <div>
-              <Label className="text-[12px]">Category</Label>
-              <Input value={category} onChange={(e) => setCategory(e.target.value)} />
-            </div>
-          </div>
-          <div>
-            <Label className="text-[12px]">Description</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} />
-          </div>
-          <div className="max-w-[12rem]">
-            <Label className="text-[12px]">Base price (₹)</Label>
-            <Input type="number" value={basePrice} onChange={(e) => setBasePrice(parseFloat(e.target.value) || 0)} />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <Label className="text-[12px]">Variants / editions</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  setVariants((vs) => [
-                    ...vs,
-                    { name: "", sku: "", price: basePrice, stock: 0, weightGrams: 300, lengthCm: 20, widthCm: 13, heightCm: 2 },
-                  ])
-                }
-              >
-                <Plus className="w-3.5 h-3.5" /> Add
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {variants.map((v, i) => (
-                <div key={i} className="grid grid-cols-12 gap-2 items-center bg-surface/50 border border-border rounded-md p-2">
-                  <Input className="col-span-3 h-8 text-[12px]" placeholder="Edition name" value={v.name} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, name: e.target.value } : x))} />
-                  <Input className="col-span-2 h-8 text-[12px] font-mono" placeholder="SKU" value={v.sku} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, sku: e.target.value } : x))} />
-                  <Input className="col-span-2 h-8 text-[12px]" type="number" placeholder="₹ Price" value={v.price} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, price: parseFloat(e.target.value) || 0 } : x))} />
-                  <Input className="col-span-2 h-8 text-[12px]" type="number" placeholder="Stock" value={v.stock} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, stock: parseInt(e.target.value) || 0 } : x))} />
-                  <Input className="col-span-2 h-8 text-[12px]" type="number" placeholder="Weight g" value={v.weightGrams} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, weightGrams: parseInt(e.target.value) || 0 } : x))} />
-                  <button className="col-span-1 text-muted-foreground hover:text-destructive justify-self-end" onClick={() => setVariants((arr) => arr.filter((_, j) => j !== i))}>
-                    <X className="w-4 h-4" />
-                  </button>
-                  <div className="col-span-12 grid grid-cols-3 gap-2">
-                    <Input className="h-7 text-[11.5px]" type="number" placeholder="L (cm)" value={v.lengthCm} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, lengthCm: parseFloat(e.target.value) || 0 } : x))} />
-                    <Input className="h-7 text-[11.5px]" type="number" placeholder="W (cm)" value={v.widthCm} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, widthCm: parseFloat(e.target.value) || 0 } : x))} />
-                    <Input className="h-7 text-[11.5px]" type="number" placeholder="H (cm)" value={v.heightCm} onChange={(e) => setVariants((arr) => arr.map((x, j) => j === i ? { ...x, heightCm: parseFloat(e.target.value) || 0 } : x))} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={save}>{isEdit ? "Save changes" : "Create product"}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
