@@ -41,6 +41,9 @@ export interface Product {
   familyLabel?: string;
   confidence?: ConfidenceLevel;
   weightSourceUrl?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  imageAlt?: string;
   createdAt: string;
 }
 
