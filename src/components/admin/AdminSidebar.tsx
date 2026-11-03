@@ -15,6 +15,8 @@ import {
   LogOut,
   X,
   Truck,
+  Layers,
+  Search,
   type LucideIcon,
 } from "lucide-react";
 import { useShipping, isStale } from "@/lib/shipping-store";
@@ -45,8 +47,10 @@ const navGroups: NavGroup[] = [
     items: [
       { icon: ShoppingCart, label: "Orders", to: "/orders", badgeKey: "orders" },
       { icon: Package, label: "Products", to: "/products" },
+      { icon: Layers, label: "Collections", to: "/collections" },
       { icon: Truck, label: "Shipping", to: "/shipping", badgeKey: "shipping" },
       { icon: Tag, label: "Discounts", to: "/discounts" },
+      { icon: Search, label: "SEO Autopilot", to: "/seo" },
     ],
   },
   {
