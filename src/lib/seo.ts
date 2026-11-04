@@ -18,7 +18,7 @@ export function suggestDescription(p: Product) {
   const min = p.variants.length ? Math.min(...p.variants.map((v) => v.price)) : p.basePrice;
   const formats = p.variants.map((v) => v.name).filter((n) => n !== "Default");
   const base = p.description?.trim() || `Shop ${p.name}${p.author ? ` by ${p.author}` : ""}.`;
-  let d = `${base} ${formats.length ? `Available in ${formats.join(", ")}. ` : ""}From ₹${min}. Fast shipping across India.`;
+  let d = `${base} ${formats.length ? `Available in ${formats.join(", ")}. ` : ""}From ₹${min}.`;
   if (d.length > 158) d = d.slice(0, 155).trimEnd() + "…";
   return d;
 }
