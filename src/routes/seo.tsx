@@ -4,11 +4,10 @@ import {
   RefreshCw, AlertTriangle, AlertOctagon, Lightbulb, Globe, Plug, ShieldCheck,
   ChevronRight, FileText, Clock, Eye, X, Check, History, Sparkles, Search,
   BarChart3, FileBarChart, CircleCheck, CircleDot, Circle, Minus, ArrowUpRight,
-  Download, BookOpen, Link2,
+  Download, BookOpen, Link2, LayoutGrid, ListChecks, Settings2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { TrendChart } from "@/components/admin/TrendChart";
@@ -142,7 +141,7 @@ function buildCatalogFindings(products: Product[]): Finding[] {
 const sources = [
   { name: "Public crawl", state: "Connected" },
   { name: "Store catalog", state: "Connected" },
-  { name: "Search Console", state: "Not connected" },
+  { name: "Search Console", state: "Connected" },
   { name: "Google Analytics", state: "Not connected" },
   { name: "Bing Webmaster", state: "Not connected" },
   { name: "PageSpeed", state: "Needs access" },
@@ -243,10 +242,95 @@ function demoSeries(): DayPoint[] {
   return out;
 }
 
+type Section = "overview" | "tasks" | "findings" | "queue" | "technical" | "pages" | "keywords" | "content" | "competitors" | "performance" | "reports" | "settings";
+
+/* ---------- demo search data (fake, for the design) ---------- */
+function trafficSeries(): DayPoint[] {
+  const out: DayPoint[] = [];
+  const t = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(t);
+    d.setDate(d.getDate() - i);
+    const w = d.getDay() === 0 || d.getDay() === 6 ? 8 : 0;
+    const clicks = Math.round(28 + (29 - i) * 0.6 + Math.sin(i / 3) * 6 + w);
+    out.push({ date: d.toISOString().slice(0, 10), label: d.toLocaleDateString([], { day: "numeric", month: "short" }), visitors: clicks, orders: 0, revenue: clicks * 31 + 200 });
+  }
+  return out;
+}
+const rankings = [
+  { q: "the lost compass book", pos: 2, change: 1, page: "/products/the-lost-compass", clicks: 184, impr: 1240 },
+  { q: "bilingual poetry book", pos: 6, change: 3, page: "/products/whispers-of-dawn", clicks: 96, impr: 2310 },
+  { q: "historical fiction books india", pos: 11, change: 4, page: "/collections/books", clicks: 72, impr: 4820 },
+  { q: "silent tides thriller", pos: 4, change: 0, page: "/products/silent-tides", clicks: 61, impr: 690 },
+  { q: "arabic edition novels", pos: 18, change: -2, page: "/products/the-lost-compass", clicks: 14, impr: 1930 },
+  { q: "buy books online india", pos: 47, change: 5, page: "/", clicks: 3, impr: 6120 },
+];
+const pages = [
+  { url: "/", title: "Home", type: "Page", indexed: true, clicks: 212, position: 9.4, issues: 0 },
+  { url: "/collections/books", title: "Books", type: "Collection", indexed: true, clicks: 148, position: 11.2, issues: 1 },
+  { url: "/products/the-lost-compass", title: "The Lost Compass", type: "Product", indexed: true, clicks: 231, position: 3.1, issues: 1 },
+  { url: "/products/whispers-of-dawn", title: "Whispers of Dawn", type: "Product", indexed: true, clicks: 104, position: 6.8, issues: 2 },
+  { url: "/products/silent-tides", title: "Silent Tides", type: "Product", indexed: true, clicks: 66, position: 4.6, issues: 1 },
+  { url: "/collections/new-arrivals", title: "New arrivals", type: "Collection", indexed: false, clicks: 0, position: 0, issues: 1 },
+  { url: "/about", title: "About us", type: "Page", indexed: true, clicks: 12, position: 22.5, issues: 0 },
+  { url: "/shipping-policy", title: "Shipping policy", type: "Page", indexed: false, clicks: 0, position: 0, issues: 1 },
+];
+const competitors = [
+  { domain: "bookwallah.in", overlap: 62, note: "Ranks above you for 'historical fiction books india'. Has a written collection intro." },
+  { domain: "kitabghar.com", overlap: 41, note: "Strong author pages — a gap you could fill." },
+  { domain: "readersnook.in", overlap: 27, note: "Gets most traffic from gift-guide posts." },
+];
+const backlinks = [
+  { from: "indianbookblog.com/best-of-2026", to: "/products/the-lost-compass", date: "3 Nov", status: "New" },
+  { from: "poetrycircle.in/reviews", to: "/products/whispers-of-dawn", date: "29 Oct", status: "New" },
+  { from: "citynews.in/local-shops", to: "/", date: "21 Oct", status: "New" },
+  { from: "oldforum.net/thread/112", to: "/", date: "18 Oct", status: "Lost" },
+];
+const calendar = [
+  { month: "Nov", day: 10, title: "Books collection intro", kind: "Collection copy", status: "Ready" },
+  { month: "Nov", day: 17, title: "Author page: The Lost Compass", kind: "New page", status: "Draft" },
+  { month: "Nov", day: 24, title: "Gift guide: books for poetry lovers", kind: "Blog post", status: "Idea" },
+  { month: "Dec", day: 1, title: "FAQ block on product pages", kind: "Page update", status: "Idea" },
+];
+
+function SectionHead({ title, desc }: { title: string; desc: string }) {
+  return (
+    <div>
+      <h2 className="text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
+      <p className="text-[13px] text-muted-foreground mt-0.5">{desc}</p>
+    </div>
+  );
+}
+function SubTabs({ value, onChange, items }: { value: string; onChange: (v: string) => void; items: [string, string][] }) {
+  return (
+    <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+      <div className="inline-flex gap-1 p-1 rounded-lg bg-surface border border-border w-max">
+        {items.map(([v, l]) => (
+          <button key={v} onClick={() => onChange(v)}
+            className={`h-8 px-3 rounded-md text-[12px] whitespace-nowrap transition-colors ${value === v ? "bg-card text-foreground font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+function Kpi({ label, value, delta, negative }: { label: string; value: string; delta?: string; negative?: boolean }) {
+  return (
+    <div className="rounded-lg bg-card border border-border p-4 min-w-0">
+      <p className="text-[12px] text-muted-foreground truncate">{label}</p>
+      <p className="text-[20px] font-semibold tabular-nums text-foreground mt-1">{value}</p>
+      {delta && <p className={`text-[11px] tabular-nums ${negative ? "text-destructive" : "text-success"}`}>{delta} vs last 30d</p>}
+    </div>
+  );
+}
+function Pill({ children, tone }: { children: React.ReactNode; tone?: string }) {
+  return <span className={`text-[11px] border border-border rounded px-1.5 py-0.5 shrink-0 whitespace-nowrap ${tone ?? "text-muted-foreground"}`}>{children}</span>;
+}
+
 /* ---------- page ---------- */
 function SeoPage() {
   const products = useProducts();
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState<Section>("overview");
+  const [sub, setSub] = useState("");
   const [state, setState] = useState<Record<string, FixState>>({});
   const [frozen, setFrozen] = useState<Record<string, Finding>>({});
   const [log, setLog] = useState<LogEntry[]>([{ at: now(), text: `Scan finished · 38 URLs, 3 products`, kind: "scan" }]);
@@ -257,6 +341,7 @@ function SeoPage() {
   const [sevFilter, setSevFilter] = useState<Severity | "all">("all");
   const [done, setDone] = useState<Record<string, boolean>>({});
   const series = useMemo(demoSeries, []);
+  const traffic = useMemo(trafficSeries, []);
 
   const live = useMemo(() => [...crawlFindings, ...buildCatalogFindings(products)], [products]);
   // keep findings that were applied (they disappear from live audit) so the queue can show them
@@ -328,386 +413,568 @@ function SeoPage() {
     return [...fromFindings, ...standing];
   }, [open]);
 
-  const tabs = [
-    ["overview", "Overview"], ["todo", "To-do"], ["findings", "Findings"], ["queue", "Fix queue"],
-    ["technical", "Technical"], ["research", "Research"], ["content", "Content"],
-    ["analytics", "Analytics"], ["reports", "Reports"], ["settings", "Settings"],
-  ] as const;
+  const openTasks = tasks.filter((t) => !done[t.id]);
+  const allChecks = techGroups.flatMap((g) => g.checks);
+  const totalClicks = traffic.reduce((a, d) => a + d.visitors, 0);
+  const totalImpr = traffic.reduce((a, d) => a + d.revenue, 0);
+
+  const nav: { group: string; items: { id: Section; label: string; icon: typeof Globe; count?: number }[] }[] = [
+    { group: "Home", items: [{ id: "overview", label: "Overview", icon: LayoutGrid }] },
+    { group: "Work", items: [
+      { id: "tasks", label: "To-do", icon: ListChecks, count: openTasks.length },
+      { id: "findings", label: "Findings", icon: AlertTriangle, count: open.length },
+      { id: "queue", label: "Fix queue", icon: Sparkles, count: safeBatch.length },
+    ] },
+    { group: "Site", items: [
+      { id: "technical", label: "Technical", icon: ShieldCheck },
+      { id: "pages", label: "Pages", icon: FileText },
+    ] },
+    { group: "Growth", items: [
+      { id: "keywords", label: "Keywords", icon: Search },
+      { id: "content", label: "Content", icon: BookOpen },
+      { id: "competitors", label: "Competitors & links", icon: Link2 },
+    ] },
+    { group: "Results", items: [
+      { id: "performance", label: "Performance", icon: BarChart3 },
+      { id: "reports", label: "Reports", icon: FileBarChart },
+    ] },
+    { group: "Setup", items: [{ id: "settings", label: "Settings", icon: Settings2 }] },
+  ];
+  const flat = nav.flatMap((g) => g.items);
+  const go = (s: Section, sub?: string) => { setTab(s); setSub(sub ?? ""); };
 
   return (
     <AdminShell title="SEO Autopilot" subtitle="Find, fix and verify what helps shoppers find you">
-      {/* store header */}
-      <div className="rounded-lg bg-card border border-border p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-md bg-surface flex items-center justify-center shrink-0"><Globe className="w-4 h-4 text-muted-foreground" /></div>
-            <div className="min-w-0">
-              <p className="text-[14px] font-medium text-foreground truncate">{DOMAIN}</p>
-              <p className="text-[12px] text-muted-foreground">Last scan {lastScan} · 38 public URLs · {products.length} catalog products</p>
-            </div>
+      {/* compact store bar */}
+      <div className="rounded-lg bg-card border border-border px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-8 h-8 rounded-md bg-surface flex items-center justify-center shrink-0"><Globe className="w-4 h-4 text-muted-foreground" /></div>
+          <div className="min-w-0">
+            <p className="text-[13px] font-medium text-foreground truncate">{DOMAIN}</p>
+            <p className="text-[11px] text-muted-foreground">Scanned {lastScan} · 38 URLs · {products.length} products · <span className="text-foreground/70">demo data</span></p>
           </div>
-          <button onClick={runScan} disabled={scanning}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium disabled:opacity-60">
-            <RefreshCw className={`w-4 h-4 ${scanning ? "animate-spin" : ""}`} /> {scanning ? "Scanning…" : "Run scan"}
-          </button>
         </div>
-        <div className="flex flex-wrap gap-1.5 mt-4">
-          {sources.map((s) => (
-            <span key={s.name} className="inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-border text-[11px] text-muted-foreground">
-              <span className={`w-1.5 h-1.5 rounded-full ${s.state === "Connected" ? "bg-success" : s.state === "Needs access" ? "bg-warning" : "bg-border"}`} />
-              {s.name} <span className="text-foreground/60">· {s.state}</span>
-            </span>
-          ))}
-        </div>
+        <button onClick={runScan} disabled={scanning}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium disabled:opacity-60">
+          <RefreshCw className={`w-4 h-4 ${scanning ? "animate-spin" : ""}`} /> {scanning ? "Scanning…" : "Run scan"}
+        </button>
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
-        <div className="overflow-x-auto -mx-1 px-1">
-          <TabsList>
-            {tabs.map(([v, l]) => (
-              <TabsTrigger key={v} value={v}>
-                {l}
-                {v === "findings" && open.length > 0 && <span className="ml-1.5 text-[11px] tabular-nums text-muted-foreground">{open.length}</span>}
-                {v === "todo" && tasks.filter((t) => !done[t.id]).length > 0 && <span className="ml-1.5 text-[11px] tabular-nums text-muted-foreground">{tasks.filter((t) => !done[t.id]).length}</span>}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </div>
-
-        {/* OVERVIEW */}
-        <TabsContent value="overview" className="space-y-4 mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Panel title="Store health" className="lg:col-span-1">
-              <div className="p-5 flex items-center gap-5">
-                <ScoreRing score={score} />
-                <div className="space-y-1.5 text-[12px]">
-                  <p className="flex items-center gap-2 text-foreground"><span className="w-1.5 h-1.5 rounded-full bg-destructive" />{count("error")} errors</p>
-                  <p className="flex items-center gap-2 text-foreground"><span className="w-1.5 h-1.5 rounded-full bg-warning" />{count("warning")} warnings</p>
-                  <p className="flex items-center gap-2 text-foreground"><span className="w-1.5 h-1.5 rounded-full bg-info" />{count("opportunity")} opportunities</p>
-                  <p className="flex items-center gap-2 text-foreground"><span className="w-1.5 h-1.5 rounded-full bg-success" />{passed} checks passed</p>
-                </div>
-              </div>
-              <p className="px-5 pb-4 text-[11px] text-muted-foreground">Score reflects open findings only. It is not a Google ranking metric.</p>
-            </Panel>
-
-            <Panel title="Next best actions" className="lg:col-span-2">
-              {open.length === 0 ? <Empty text="Nothing open. Run a scan after your next catalog change." /> : (
-                <ul className="divide-y divide-border">
-                  {[...open].sort((a, b) => order(a) - order(b)).slice(0, 5).map((f) => (
-                    <FindingRow key={f.id} f={f} onClick={() => setDetail(f)} />
-                  ))}
-                </ul>
-              )}
-              {safeBatch.length > 0 && (
-                <div className="px-4 sm:px-5 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap">
-                  <p className="text-[12px] text-muted-foreground">{safeBatch.length} safe, reversible fixes ready</p>
-                  <button onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5">
-                    <Eye className="w-3.5 h-3.5" /> Review batch
-                  </button>
-                </div>
-              )}
-            </Panel>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Panel title="Google search performance" className="lg:col-span-2">
-              <div className="p-5 text-center">
-                <Plug className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
-                <p className="text-[13px] text-foreground">No search data yet</p>
-                <p className="text-[12px] text-muted-foreground mt-1">Connect Search Console to see real clicks, impressions and positions. We never show estimated traffic.</p>
-                <button onClick={() => setTab("settings")} className="mt-3 h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect</button>
-              </div>
-            </Panel>
-            <Panel title="Recent activity">
-              <ActivityList log={log.slice(0, 6)} />
-            </Panel>
-          </div>
-        </TabsContent>
-
-        {/* TO-DO */}
-        <TabsContent value="todo" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Stat label="Open tasks" value={tasks.filter((t) => !done[t.id]).length} tone="text-info" />
-            <Stat label="High priority" value={tasks.filter((t) => !done[t.id] && t.priority === "High").length} tone="text-destructive" />
-            <Stat label="Done this session" value={Object.values(done).filter(Boolean).length} tone="text-success" />
-            <Stat label="From autopilot" value={tasks.filter((t) => t.source === "Autopilot").length} tone="text-foreground" />
-          </div>
-          <Panel title="Task list">
-            <ul className="divide-y divide-border">
-              {tasks.map((t) => {
-                const isDone = !!done[t.id];
-                return (
-                  <li key={t.id} className="px-4 sm:px-5 py-3 flex items-start gap-3">
-                    <button
-                      onClick={() => {
-                        setDone((d) => ({ ...d, [t.id]: !d[t.id] }));
-                        if (!isDone) addLog(`Task done: ${t.title}`, "applied");
-                      }}
-                      className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground"
-                      aria-label={isDone ? "Mark not done" : "Mark done"}
-                    >
-                      {isDone ? <CircleCheck className="w-4.5 h-4.5 text-success" /> : <Circle className="w-4.5 h-4.5" />}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-[13px] ${isDone ? "text-muted-foreground line-through decoration-muted-foreground/50" : "text-foreground"}`}>{t.title}</p>
-                      <p className="text-[12px] text-muted-foreground truncate">{t.detail}</p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[11px] ${t.priority === "High" ? "text-destructive" : t.priority === "Medium" ? "text-warning" : "text-muted-foreground"}`}>{t.priority}</span>
-                      <span className="hidden sm:inline text-[11px] text-muted-foreground border border-border rounded px-1.5 py-0.5">{t.source}</span>
-                      {t.finding && (
-                        <button onClick={() => setDetail(t.finding)} className="text-[12px] text-foreground underline underline-offset-2">Open</button>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </Panel>
-          <p className="text-[11px] text-muted-foreground">Tasks regenerate from each scan. Checking one off here doesn't change the site — apply fixes from Findings.</p>
-        </TabsContent>
-
-        {/* FINDINGS */}
-        <TabsContent value="findings" className="space-y-4 mt-4">
-          <div className="flex flex-wrap gap-1.5">
-            {(["all", "error", "warning", "opportunity"] as const).map((s) => (
-              <button key={s} onClick={() => setSevFilter(s)}
-                className={`h-8 px-3 rounded-md text-[12px] border ${sevFilter === s ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground"}`}>
-                {s === "all" ? `All · ${open.length}` : `${sevMeta[s].label}s · ${count(s)}`}
-              </button>
-            ))}
-          </div>
-          <Panel title={`Scan from ${lastScan}`}>
-            {open.filter((f) => sevFilter === "all" || f.severity === sevFilter).length === 0 ? <Empty text="No findings in this group." /> : (
-              <ul className="divide-y divide-border">
-                {open.filter((f) => sevFilter === "all" || f.severity === sevFilter).sort((a, b) => order(a) - order(b)).map((f) => (
-                  <FindingRow key={f.id} f={f} onClick={() => setDetail(f)} showSource />
-                ))}
-              </ul>
-            )}
-          </Panel>
-          <p className="text-[11px] text-muted-foreground">Site-wide findings are sample results that show how a public crawl would report. Catalog findings come from your products.</p>
-        </TabsContent>
-
-        {/* FIX QUEUE */}
-        <TabsContent value="queue" className="mt-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Lane title="Fix now" hint="Safe and reversible" items={open.filter((f) => f.safe)} onOpen={setDetail}
-              action={safeBatch.length ? <button onClick={() => setReview(safeBatch)} className="text-[12px] text-foreground underline underline-offset-2">Review all</button> : null} />
-            <Lane title="Needs your review" hint="Changes URLs, facts or your words" items={open.filter((f) => !f.safe && f.source === "Store catalog")} onOpen={setDetail} />
-            <Lane title="Waiting for platform access" hint="Needs a developer or store setting" items={open.filter((f) => f.source === "Public crawl")} onOpen={setDetail} />
-            <Lane title="Applied" hint="Verified on the next scan" items={all.filter((f) => st(f) === "verifying" || st(f) === "verified")} onOpen={setDetail} statusOf={st} />
-          </div>
-        </TabsContent>
-
-        {/* TECHNICAL */}
-        <TabsContent value="technical" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Stat label="Passed" value={techGroups.flatMap((g) => g.checks).filter((c) => c.status === "pass").length} tone="text-success" />
-            <Stat label="Warnings" value={techGroups.flatMap((g) => g.checks).filter((c) => c.status === "warn").length} tone="text-warning" />
-            <Stat label="Failing" value={techGroups.flatMap((g) => g.checks).filter((c) => c.status === "fail").length} tone="text-destructive" />
-            <Stat label="Needs access" value={techGroups.flatMap((g) => g.checks).filter((c) => c.status === "locked").length} tone="text-muted-foreground" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {techGroups.map((g) => (
-              <Panel key={g.label} title={g.label}>
-                <ul className="divide-y divide-border">
-                  {g.checks.map((c) => (
-                    <li key={c.name} className="px-4 sm:px-5 py-3 flex items-start gap-3">
-                      <CheckIcon status={c.status} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[13px] text-foreground">{c.name}</p>
-                        <p className="text-[12px] text-muted-foreground">{c.detail}</p>
-                      </div>
-                      {c.note && <span className="text-[11px] text-muted-foreground border border-border rounded px-1.5 py-0.5 shrink-0 hidden sm:inline">{c.note}</span>}
+      <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)] gap-6">
+        {/* inner nav — desktop */}
+        <aside className="hidden lg:block">
+          <nav className="sticky top-4 space-y-5">
+            {nav.map((g) => (
+              <div key={g.group}>
+                <p className="px-2 mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">{g.group}</p>
+                <ul className="space-y-px">
+                  {g.items.map((it) => (
+                    <li key={it.id}>
+                      <button onClick={() => go(it.id)}
+                        className={`w-full flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${tab === it.id ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
+                        <it.icon className="w-[15px] h-[15px] shrink-0" />
+                        <span className="flex-1 text-left">{it.label}</span>
+                        {!!it.count && <span className="text-[10px] tabular-nums text-muted-foreground bg-surface px-1.5 py-0.5 rounded">{it.count}</span>}
+                      </button>
                     </li>
                   ))}
                 </ul>
-              </Panel>
+              </div>
+            ))}
+          </nav>
+        </aside>
+
+        {/* inner nav — mobile */}
+        <div className="lg:hidden -mx-4 px-4 overflow-x-auto">
+          <div className="flex gap-1.5 w-max">
+            {flat.map((it) => (
+              <button key={it.id} onClick={() => go(it.id)}
+                className={`h-8 px-3 rounded-full text-[12px] border whitespace-nowrap inline-flex items-center gap-1.5 ${tab === it.id ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground"}`}>
+                {it.label}{!!it.count && <span className="tabular-nums opacity-70">{it.count}</span>}
+              </button>
             ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">Sample results that show how a technical crawl would report. Connect PageSpeed in Settings to unlock speed checks.</p>
-        </TabsContent>
+        </div>
 
-        {/* RESEARCH */}
-        <TabsContent value="research" className="space-y-4 mt-4">
-          <Panel title="Keyword opportunities">
-            <ul className="divide-y divide-border">
-              {keywords.map((k) => (
-                <li key={k.phrase} className="px-4 sm:px-5 py-3 flex items-start gap-3">
-                  <Search className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-foreground">{k.phrase}</p>
-                    <p className="text-[12px] text-muted-foreground">Target: {k.target} · {k.basis}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className={`text-[11px] border rounded px-1.5 py-0.5 ${k.intent === "Buy" ? "text-success border-border" : "text-muted-foreground border-border"}`}>{k.intent}</span>
-                    <span className="text-[11px] text-muted-foreground border border-border rounded px-1.5 py-0.5 hidden sm:inline">Fit: {k.fit}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className="px-4 sm:px-5 py-3 border-t border-border text-[11px] text-muted-foreground">
-              Directional only — derived from your catalog, not search volumes. Connect Search Console to replace these with queries people actually use to find you.
-            </p>
-          </Panel>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Panel title="Content gaps">
-              <ul className="divide-y divide-border">
-                {contentGaps.map((g) => (
-                  <li key={g.title} className="px-4 sm:px-5 py-3 flex items-start gap-3">
-                    <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-foreground">{g.title}</p>
-                      <p className="text-[12px] text-muted-foreground">{g.detail}</p>
-                    </div>
-                    <span className="text-[11px] text-muted-foreground border border-border rounded px-1.5 py-0.5 shrink-0">{g.effort} effort</span>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-            <Panel title="Off-page & local">
-              <ul className="divide-y divide-border">
-                {[
-                  { icon: Link2, t: "Google Business Profile", d: "Not linked. For a local or brand search presence, create and verify a profile." },
-                  { icon: Link2, t: "Instagram link in bio", d: "Most of your buyers come from Instagram — make sure the bio link points to a fast landing page, not the homepage." },
-                  { icon: Link2, t: "Directory & review listings", d: "Consistent name, address and link on 2–3 relevant directories. Quality over quantity." },
-                  { icon: Link2, t: "Backlink opportunities", d: "Author interviews, book bloggers and local press are realistic link sources for this catalog." },
-                ].map((r) => (
-                  <li key={r.t} className="px-4 sm:px-5 py-3 flex items-start gap-3">
-                    <r.icon className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[13px] text-foreground">{r.t}</p>
-                      <p className="text-[12px] text-muted-foreground">{r.d}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </Panel>
-          </div>
-        </TabsContent>
-
-        {/* CONTENT */}
-        <TabsContent value="content" className="space-y-4 mt-4">
-          <Panel title="Content briefs">
-            <ul className="divide-y divide-border">
-              {products.map((p) => <BriefRow key={p.id} p={p} />)}
-              <li className="px-4 sm:px-5 py-4">
-                <div className="flex items-start gap-3">
-                  <FileText className="w-4 h-4 text-muted-foreground mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-foreground">Collection page: Books</p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">Short intro explaining what's in the collection and who it's for. 2–3 sentences, above the product grid.</p>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground shrink-0">Category</span>
-                </div>
-              </li>
-            </ul>
-          </Panel>
-          <p className="text-[11px] text-muted-foreground">Drafts only use facts from your catalog. Anything missing shows as a question for you — nothing is published without approval.</p>
-        </TabsContent>
-
-        {/* ANALYTICS */}
-        <TabsContent value="analytics" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <Stat label="Health score" value={score} tone="text-info" />
-            <Stat label="Fixes applied" value={log.filter((l) => l.kind === "applied").length} tone="text-success" />
-            <Stat label="Verified live" value={log.filter((l) => l.kind === "verified").length} tone="text-success" />
-            <Stat label="Scans run" value={log.filter((l) => l.kind === "scan").length} tone="text-foreground" />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Panel title="Health score · 30 days">
-              <div className="p-4">
-                <TrendChart data={series} dataKey="visitors" height={180} formatValue={(n) => `${n}/100`} />
-              </div>
-            </Panel>
-            <Panel title="Issues found vs fixed · 30 days">
-              <div className="p-4">
-                <TrendChart data={series} dataKey="orders" height={180} variant="bar" formatValue={(n) => `${n} fixed`} />
-              </div>
-            </Panel>
-          </div>
-
-          <Panel title="Search traffic">
-            <div className="p-5 text-center">
-              <BarChart3 className="w-5 h-5 text-muted-foreground mx-auto mb-2" />
-              <p className="text-[13px] text-foreground">Real traffic charts appear here</p>
-              <p className="text-[12px] text-muted-foreground mt-1">Clicks, impressions, average position and top queries — once Search Console is connected. The charts above use demo data to show the layout.</p>
-              <button onClick={() => setTab("settings")} className="mt-3 h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect Search Console</button>
-            </div>
-          </Panel>
-        </TabsContent>
-
-        {/* REPORTS */}
-        <TabsContent value="reports" className="space-y-4 mt-4">
-          <Panel title="Weekly reports">
-            <ul className="divide-y divide-border">
-              {reports.map((r) => (
-                <li key={r.week} className="px-4 sm:px-5 py-4 flex items-start gap-3">
-                  <FileBarChart className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] text-foreground">{r.week}</p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">
-                      Score {r.score}/100{r.delta !== 0 && <> · <span className={r.delta > 0 ? "text-success" : "text-destructive"}>{r.delta > 0 ? "+" : ""}{r.delta}</span></>} · {r.fixes} fixes · {r.highlight}
-                    </p>
-                  </div>
-                  <button onClick={() => toast("PDF export is part of the full build")} className="h-8 px-2.5 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5 shrink-0">
-                    <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </Panel>
-          <Panel title="Client summary">
-            <div className="p-4 sm:p-5 space-y-3">
-              <p className="text-[12px] text-muted-foreground">A plain-language summary you can send to the store owner. Generated from this week's scan — no jargon, no invented numbers.</p>
-              <div className="rounded-md bg-surface p-4 text-[13px] text-foreground space-y-2">
-                <p className="font-medium">Week of {lastScan}</p>
-                <p>Your store scored {score}/100 on our checks. We found {count("error")} errors and {count("warning")} warnings, and prepared {safeBatch.length} fixes you can apply with one tap.</p>
-                <p>Biggest win this week: {reports[0].highlight}.</p>
-                <p>Next: connect Search Console so we can show how many people actually find you on Google.</p>
-              </div>
-              <div className="flex justify-end">
-                <button onClick={() => toast("Email sharing is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5">
-                  <ArrowUpRight className="w-3.5 h-3.5" /> Send to client
-                </button>
-              </div>
-            </div>
-          </Panel>
-        </TabsContent>
-
-        {/* SETTINGS */}
-        <TabsContent value="settings" className="space-y-4 mt-4">
-          <Panel title="Data sources">
-            <ul className="divide-y divide-border">
-              {sources.map((s) => (
-                <li key={s.name} className="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+        <div className="min-w-0 space-y-6">
+          {/* OVERVIEW */}
+          {tab === "overview" && (
+            <>
+              <SectionHead title="Overview" desc="How the store is doing in search, and the few things worth doing next." />
+              <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4">
+                <div className="rounded-lg bg-card border border-border p-5 flex items-center gap-5">
+                  <ScoreRing score={score} />
                   <div>
-                    <p className="text-[13px] text-foreground">{s.name}</p>
-                    <p className="text-[12px] text-muted-foreground">{s.state}</p>
+                    <p className="text-[13px] font-medium text-foreground">Store health</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">{count("error")} errors · {count("warning")} warnings</p>
+                    <p className="text-[12px] text-muted-foreground">{passed} checks passed</p>
                   </div>
-                  {s.state === "Connected"
-                    ? <span className="text-[12px] text-success inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Active</span>
-                    : <button onClick={() => toast("Connection flow is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect</button>}
-                </li>
-              ))}
-            </ul>
-          </Panel>
-          <Panel title="Automation rules">
-            <ul className="divide-y divide-border">
-              <Rule label="Weekly scan" desc="Every Monday at 06:00. Results land in Findings." defaultOn />
-              <Rule label="Auto-apply alt text" desc="Fill missing image alt text without asking." />
-              <Rule label="Auto-apply search titles & descriptions" desc="Only for products with none set. Never overwrites your text." />
-              <Rule label="Always ask before changing URLs" desc="URL changes need a redirect and can't be auto-applied." defaultOn locked />
-              <Rule label="Never touch prices, stock or descriptions" desc="Autopilot can only suggest these." defaultOn locked />
-              <Rule label="Never invent facts" desc="Drafts use only catalog data. Missing info becomes a question, not a guess." defaultOn locked />
-            </ul>
-          </Panel>
-          <Panel title="Change history"><ActivityList log={log} /></Panel>
-        </TabsContent>
-      </Tabs>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <Kpi label="Clicks · 30d" value={totalClicks.toLocaleString()} delta="+18%" />
+                  <Kpi label="Impressions" value={`${(totalImpr / 1000).toFixed(1)}k`} delta="+24%" />
+                  <Kpi label="Avg. position" value="14.2" delta="+2.1" />
+                  <Kpi label="Indexed pages" value="34/38" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
+                <Panel title="Next best actions" className="xl:col-span-3"
+                  action={<button onClick={() => go("findings")} className="text-[12px] text-muted-foreground hover:text-foreground">See all</button>}>
+                  {open.length === 0 ? <Empty text="Nothing open. Run a scan after your next catalog change." /> : (
+                    <ul className="divide-y divide-border">
+                      {[...open].sort((a, b) => order(a) - order(b)).slice(0, 3).map((f) => (
+                        <FindingRow key={f.id} f={f} onClick={() => setDetail(f)} />
+                      ))}
+                    </ul>
+                  )}
+                  {safeBatch.length > 0 && (
+                    <div className="px-4 sm:px-5 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap bg-surface/50">
+                      <p className="text-[12px] text-muted-foreground">{safeBatch.length} safe fixes ready to apply</p>
+                      <button onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md bg-foreground text-background text-[12px] font-medium inline-flex items-center gap-1.5">
+                        <Eye className="w-3.5 h-3.5" /> Review & apply
+                      </button>
+                    </div>
+                  )}
+                </Panel>
+                <Panel title="Recent activity" className="xl:col-span-2">
+                  <ActivityList log={log.slice(0, 5)} />
+                </Panel>
+              </div>
+
+              <Panel title="Clicks from Google · 30 days"
+                action={<button onClick={() => go("performance")} className="text-[12px] text-muted-foreground hover:text-foreground">Details</button>}>
+                <div className="p-4"><TrendChart data={traffic} dataKey="visitors" height={170} formatValue={(n) => `${n} clicks`} /></div>
+              </Panel>
+            </>
+          )}
+
+          {/* TO-DO */}
+          {tab === "tasks" && (
+            <>
+              <SectionHead title="To-do" desc="Your weekly work list. Built from the latest scan plus standing routines." />
+              <SubTabs value={sub || "open"} onChange={setSub} items={[["open", `Open · ${openTasks.length}`], ["done", `Done · ${tasks.length - openTasks.length}`]]} />
+              <Panel title={sub === "done" ? "Completed" : "Open tasks"}>
+                {(() => {
+                  const list = tasks.filter((t) => (sub === "done" ? done[t.id] : !done[t.id]));
+                  if (!list.length) return <Empty text={sub === "done" ? "Nothing checked off yet." : "All done — nice."} />;
+                  return (
+                    <ul className="divide-y divide-border">
+                      {list.map((t) => {
+                        const isDone = !!done[t.id];
+                        return (
+                          <li key={t.id} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
+                            <button onClick={() => { setDone((d) => ({ ...d, [t.id]: !d[t.id] })); if (!isDone) addLog(`Task done: ${t.title}`, "applied"); }}
+                              className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground" aria-label={isDone ? "Mark not done" : "Mark done"}>
+                              {isDone ? <CircleCheck className="w-[18px] h-[18px] text-success" /> : <Circle className="w-[18px] h-[18px]" />}
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-[13px] ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>{t.title}</p>
+                              <p className="text-[12px] text-muted-foreground">{t.detail}</p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <Pill tone={t.priority === "High" ? "text-destructive" : t.priority === "Medium" ? "text-warning" : "text-muted-foreground"}>{t.priority}</Pill>
+                              {t.finding && <button onClick={() => setDetail(t.finding)} className="text-[12px] text-foreground underline underline-offset-2">Open</button>}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  );
+                })()}
+              </Panel>
+            </>
+          )}
+
+          {/* FINDINGS */}
+          {tab === "findings" && (
+            <>
+              <SectionHead title="Findings" desc={`Everything the scan from ${lastScan} found. Tap one to see evidence and the fix.`} />
+              <SubTabs value={sub || "all"} onChange={setSub} items={[
+                ["all", `All · ${open.length}`], ["error", `Errors · ${count("error")}`], ["warning", `Warnings · ${count("warning")}`], ["opportunity", `Opportunities · ${count("opportunity")}`],
+              ]} />
+              <Panel title="Results">
+                {(() => {
+                  const f0 = sub || "all";
+                  const list = open.filter((f) => f0 === "all" || f.severity === f0).sort((a, b) => order(a) - order(b));
+                  return list.length === 0 ? <Empty text="No findings in this group." /> : (
+                    <ul className="divide-y divide-border">{list.map((f) => <FindingRow key={f.id} f={f} onClick={() => setDetail(f)} showSource />)}</ul>
+                  );
+                })()}
+              </Panel>
+            </>
+          )}
+
+          {/* FIX QUEUE */}
+          {tab === "queue" && (() => {
+            const lanes = {
+              now: { title: "Fix now", hint: "Safe and reversible — one approval applies them.", items: open.filter((f) => f.safe) },
+              review: { title: "Needs your review", hint: "Changes URLs, facts or your own words.", items: open.filter((f) => !f.safe && f.source === "Store catalog") },
+              access: { title: "Waiting for access", hint: "Needs a developer or a store setting.", items: open.filter((f) => f.source === "Public crawl") },
+              applied: { title: "Applied", hint: "Confirmed live on the next scan.", items: all.filter((f) => st(f) === "verifying" || st(f) === "verified") },
+            } as const;
+            const k = (sub || "now") as keyof typeof lanes;
+            return (
+              <>
+                <SectionHead title="Fix queue" desc="Fixes sorted by how much attention they need from you." />
+                <SubTabs value={k} onChange={setSub} items={(Object.keys(lanes) as (keyof typeof lanes)[]).map((x) => [x, `${lanes[x].title} · ${lanes[x].items.length}`])} />
+                <Lane title={lanes[k].title} hint={lanes[k].hint} items={[...lanes[k].items]} onOpen={setDetail} statusOf={k === "applied" ? st : undefined}
+                  action={k === "now" && safeBatch.length ? <button onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md bg-foreground text-background text-[12px] font-medium">Review all</button> : null} />
+              </>
+            );
+          })()}
+
+          {/* TECHNICAL */}
+          {tab === "technical" && (() => {
+            const g = techGroups.find((x) => x.label === sub) ?? techGroups[0];
+            return (
+              <>
+                <SectionHead title="Technical health" desc="Can Google crawl, understand and load your store quickly?" />
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <Stat label="Passed" value={allChecks.filter((c) => c.status === "pass").length} tone="text-success" />
+                  <Stat label="Warnings" value={allChecks.filter((c) => c.status === "warn").length} tone="text-warning" />
+                  <Stat label="Failing" value={allChecks.filter((c) => c.status === "fail").length} tone="text-destructive" />
+                  <Stat label="Needs access" value={allChecks.filter((c) => c.status === "locked").length} tone="text-muted-foreground" />
+                </div>
+                <SubTabs value={g.label} onChange={setSub} items={techGroups.map((x) => [x.label, x.label])} />
+                <Panel title={g.label}>
+                  <ul className="divide-y divide-border">
+                    {g.checks.map((c) => (
+                      <li key={c.name} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
+                        <CheckIcon status={c.status} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{c.name}</p>
+                          <p className="text-[12px] text-muted-foreground">{c.detail}</p>
+                        </div>
+                        {c.note && <Pill>{c.note}</Pill>}
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              </>
+            );
+          })()}
+
+          {/* PAGES */}
+          {tab === "pages" && (() => {
+            const f0 = sub || "all";
+            const list = pages.filter((p) => f0 === "all" || (f0 === "issues" ? p.issues > 0 : p.type === f0));
+            return (
+              <>
+                <SectionHead title="Pages" desc="Every public page, its search status and how it performs." />
+                <SubTabs value={f0} onChange={setSub} items={[["all", `All · ${pages.length}`], ["issues", `With issues · ${pages.filter((p) => p.issues).length}`], ["Product", "Products"], ["Collection", "Collections"], ["Page", "Other"]]} />
+                <Panel title={`${list.length} pages`}>
+                  <div className="hidden md:grid grid-cols-[minmax(0,1fr)_90px_80px_70px_70px] gap-3 px-5 py-2 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border">
+                    <span>Page</span><span>Index</span><span className="text-right">Clicks</span><span className="text-right">Position</span><span className="text-right">Issues</span>
+                  </div>
+                  <ul className="divide-y divide-border">
+                    {list.map((p) => (
+                      <li key={p.url} className="px-4 sm:px-5 py-3 md:grid md:grid-cols-[minmax(0,1fr)_90px_80px_70px_70px] md:gap-3 md:items-center">
+                        <div className="min-w-0">
+                          <p className="text-[13px] text-foreground truncate">{p.title}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{p.url} · {p.type}</p>
+                        </div>
+                        <div className="flex md:contents items-center gap-3 mt-1.5 md:mt-0 text-[12px]">
+                          <span className={p.indexed ? "text-success" : "text-warning"}>{p.indexed ? "Indexed" : "Not indexed"}</span>
+                          <span className="md:text-right tabular-nums text-foreground">{p.clicks} <span className="md:hidden text-muted-foreground">clicks</span></span>
+                          <span className="md:text-right tabular-nums text-muted-foreground">{p.position ? `#${p.position}` : "—"}</span>
+                          <span className={`md:text-right tabular-nums ${p.issues ? "text-destructive" : "text-muted-foreground"}`}>{p.issues || "—"}<span className="md:hidden"> issues</span></span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              </>
+            );
+          })()}
+
+          {/* KEYWORDS */}
+          {tab === "keywords" && (
+            <>
+              <SectionHead title="Keywords" desc="What people search, where you rank, and what to target next." />
+              <SubTabs value={sub || "rankings"} onChange={setSub} items={[["rankings", "Rankings"], ["opportunities", "Opportunities"]]} />
+              {(sub || "rankings") === "rankings" ? (
+                <Panel title="Tracked keywords">
+                  <ul className="divide-y divide-border">
+                    {rankings.map((r) => (
+                      <li key={r.q} className="px-4 sm:px-5 py-3 flex items-center gap-3">
+                        <div className="w-10 text-[15px] font-semibold tabular-nums text-foreground">#{r.pos}</div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground truncate">{r.q}</p>
+                          <p className="text-[11px] text-muted-foreground truncate">{r.page} · {r.clicks} clicks · {r.impr.toLocaleString()} impressions</p>
+                        </div>
+                        <span className={`text-[12px] tabular-nums shrink-0 ${r.change > 0 ? "text-success" : r.change < 0 ? "text-destructive" : "text-muted-foreground"}`}>
+                          {r.change > 0 ? `▲ ${r.change}` : r.change < 0 ? `▼ ${-r.change}` : "—"}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              ) : (
+                <Panel title="Keyword opportunities">
+                  <ul className="divide-y divide-border">
+                    {keywords.map((k) => (
+                      <li key={k.phrase} className="px-4 sm:px-5 py-3 flex items-start gap-3">
+                        <Search className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{k.phrase}</p>
+                          <p className="text-[12px] text-muted-foreground">Target: {k.target} · {k.basis}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Pill tone={k.intent === "Buy" ? "text-success" : undefined}>{k.intent}</Pill>
+                          <span className="hidden sm:inline"><Pill>Fit: {k.fit}</Pill></span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+            </>
+          )}
+
+          {/* CONTENT */}
+          {tab === "content" && (
+            <>
+              <SectionHead title="Content" desc="Briefs built only from your catalog facts, gaps to fill, and a simple plan." />
+              <SubTabs value={sub || "briefs"} onChange={setSub} items={[["briefs", "Briefs"], ["gaps", "Gaps"], ["calendar", "Calendar"]]} />
+              {(sub || "briefs") === "briefs" && (
+                <Panel title="Content briefs"><ul className="divide-y divide-border">{products.map((p) => <BriefRow key={p.id} p={p} />)}</ul></Panel>
+              )}
+              {sub === "gaps" && (
+                <Panel title="Content gaps">
+                  <ul className="divide-y divide-border">
+                    {contentGaps.map((g) => (
+                      <li key={g.title} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
+                        <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{g.title}</p>
+                          <p className="text-[12px] text-muted-foreground">{g.detail}</p>
+                        </div>
+                        <Pill>{g.effort} effort</Pill>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+              {sub === "calendar" && (
+                <Panel title="Next 4 weeks">
+                  <ul className="divide-y divide-border">
+                    {calendar.map((c) => (
+                      <li key={c.title} className="px-4 sm:px-5 py-3.5 flex items-center gap-4">
+                        <div className="w-14 shrink-0 text-center">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.month}</p>
+                          <p className="text-[18px] font-semibold tabular-nums text-foreground leading-tight">{c.day}</p>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{c.title}</p>
+                          <p className="text-[12px] text-muted-foreground">{c.kind}</p>
+                        </div>
+                        <Pill tone={c.status === "Ready" ? "text-success" : c.status === "Draft" ? "text-warning" : undefined}>{c.status}</Pill>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+            </>
+          )}
+
+          {/* COMPETITORS & LINKS */}
+          {tab === "competitors" && (
+            <>
+              <SectionHead title="Competitors & links" desc="Who you share searches with, and where trust and links can come from." />
+              <SubTabs value={sub || "competitors"} onChange={setSub} items={[["competitors", "Competitors"], ["links", "Backlinks"], ["local", "Local & social"]]} />
+              {(sub || "competitors") === "competitors" && (
+                <Panel title="Sharing your keywords">
+                  <ul className="divide-y divide-border">
+                    {competitors.map((c) => (
+                      <li key={c.domain} className="px-4 sm:px-5 py-3.5">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-[13px] text-foreground truncate">{c.domain}</p>
+                          <span className="text-[12px] text-muted-foreground tabular-nums shrink-0">{c.overlap}% overlap</span>
+                        </div>
+                        <div className="mt-2 h-1.5 rounded-full bg-surface overflow-hidden"><div className="h-full bg-foreground/70" style={{ width: `${c.overlap}%` }} /></div>
+                        <p className="text-[12px] text-muted-foreground mt-2">{c.note}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+              {sub === "links" && (
+                <>
+                  <div className="grid grid-cols-3 gap-3">
+                    <Kpi label="Referring sites" value="23" delta="+3" />
+                    <Kpi label="Total links" value="61" delta="+7" />
+                    <Kpi label="Lost · 30d" value="2" />
+                  </div>
+                  <Panel title="Newest links">
+                    <ul className="divide-y divide-border">
+                      {backlinks.map((b) => (
+                        <li key={b.from} className="px-4 sm:px-5 py-3 flex items-center gap-3">
+                          <Link2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] text-foreground truncate">{b.from}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">→ {b.to} · {b.date}</p>
+                          </div>
+                          <Pill tone={b.status === "Lost" ? "text-destructive" : "text-success"}>{b.status}</Pill>
+                        </li>
+                      ))}
+                    </ul>
+                  </Panel>
+                </>
+              )}
+              {sub === "local" && (
+                <Panel title="Local & social presence">
+                  <ul className="divide-y divide-border">
+                    {[
+                      { t: "Google Business Profile", d: "Not linked. Create and verify a profile for brand searches.", s: "To do" },
+                      { t: "Instagram link in bio", d: "Points to homepage — a focused landing page converts better.", s: "Improve" },
+                      { t: "Directory listings", d: "Same name, address and link on 2–3 relevant directories.", s: "2 of 3" },
+                      { t: "Reviews on Google", d: "No reviews yet. Ask recent buyers after delivery.", s: "To do" },
+                    ].map((r) => (
+                      <li key={r.t} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{r.t}</p>
+                          <p className="text-[12px] text-muted-foreground">{r.d}</p>
+                        </div>
+                        <Pill>{r.s}</Pill>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+            </>
+          )}
+
+          {/* PERFORMANCE */}
+          {tab === "performance" && (
+            <>
+              <SectionHead title="Performance" desc="Real results from Google, and how the store's SEO health is trending." />
+              <SubTabs value={sub || "search"} onChange={setSub} items={[["search", "Search traffic"], ["health", "SEO health"]]} />
+              {(sub || "search") === "search" ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Kpi label="Clicks" value={totalClicks.toLocaleString()} delta="+18%" />
+                    <Kpi label="Impressions" value={`${(totalImpr / 1000).toFixed(1)}k`} delta="+24%" />
+                    <Kpi label="Click rate" value={`${((totalClicks / totalImpr) * 100).toFixed(1)}%`} delta="-0.2%" negative />
+                    <Kpi label="Avg. position" value="14.2" delta="+2.1" />
+                  </div>
+                  <Panel title="Clicks · 30 days"><div className="p-4"><TrendChart data={traffic} dataKey="visitors" height={200} formatValue={(n) => `${n} clicks`} /></div></Panel>
+                  <Panel title="Top searches">
+                    <ul className="divide-y divide-border">
+                      {rankings.slice(0, 5).map((r) => (
+                        <li key={r.q} className="px-4 sm:px-5 py-3 flex items-center gap-3">
+                          <p className="flex-1 min-w-0 text-[13px] text-foreground truncate">{r.q}</p>
+                          <span className="text-[12px] tabular-nums text-foreground w-14 text-right">{r.clicks}</span>
+                          <span className="text-[12px] tabular-nums text-muted-foreground w-16 text-right hidden sm:inline">{r.impr.toLocaleString()}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Panel>
+                </>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <Stat label="Health score" value={score} tone="text-info" />
+                    <Stat label="Fixes applied" value={log.filter((l) => l.kind === "applied").length} tone="text-success" />
+                    <Stat label="Verified live" value={log.filter((l) => l.kind === "verified").length} tone="text-success" />
+                    <Stat label="Scans run" value={log.filter((l) => l.kind === "scan").length} tone="text-foreground" />
+                  </div>
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <Panel title="Health score · 30 days"><div className="p-4"><TrendChart data={series} dataKey="visitors" height={180} formatValue={(n) => `${n}/100`} /></div></Panel>
+                    <Panel title="Fixes applied · 30 days"><div className="p-4"><TrendChart data={series} dataKey="orders" height={180} variant="bar" formatValue={(n) => `${n} fixed`} /></div></Panel>
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* REPORTS */}
+          {tab === "reports" && (
+            <>
+              <SectionHead title="Reports" desc="Weekly progress, and a plain-language summary for the store owner." />
+              <SubTabs value={sub || "weekly"} onChange={setSub} items={[["weekly", "Weekly"], ["summary", "Client summary"]]} />
+              {(sub || "weekly") === "weekly" ? (
+                <Panel title="Weekly reports">
+                  <ul className="divide-y divide-border">
+                    {reports.map((r) => (
+                      <li key={r.week} className="px-4 sm:px-5 py-4 flex items-center gap-4">
+                        <div className="w-12 shrink-0 text-center">
+                          <p className="text-[18px] font-semibold tabular-nums text-foreground leading-none">{r.score}</p>
+                          <p className={`text-[11px] tabular-nums mt-1 ${r.delta > 0 ? "text-success" : "text-muted-foreground"}`}>{r.delta > 0 ? `+${r.delta}` : "—"}</p>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] text-foreground">{r.week}</p>
+                          <p className="text-[12px] text-muted-foreground">{r.fixes} fixes · {r.highlight}</p>
+                        </div>
+                        <button onClick={() => toast("PDF export is part of the full build")} className="h-8 px-2.5 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5 shrink-0">
+                          <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              ) : (
+                <Panel title="Client summary">
+                  <div className="p-4 sm:p-5 space-y-4">
+                    <div className="rounded-md bg-surface p-4 sm:p-5 text-[13px] text-foreground space-y-2.5 leading-relaxed">
+                      <p className="font-medium">Week of {lastScan}</p>
+                      <p>Your store scored {score}/100 on our checks. {totalClicks} people clicked through to your store from Google this month — 18% more than last month.</p>
+                      <p>We found {count("error")} errors and {count("warning")} warnings, and prepared {safeBatch.length} fixes you can approve with one tap.</p>
+                      <p>Biggest win: {reports[0].highlight}.</p>
+                    </div>
+                    <div className="flex justify-end">
+                      <button onClick={() => toast("Email sharing is part of the full build")} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium inline-flex items-center gap-1.5">
+                        <ArrowUpRight className="w-3.5 h-3.5" /> Send to client
+                      </button>
+                    </div>
+                  </div>
+                </Panel>
+              )}
+            </>
+          )}
+
+          {/* SETTINGS */}
+          {tab === "settings" && (
+            <>
+              <SectionHead title="Settings" desc="Where data comes from, what the autopilot may do alone, and every change it made." />
+              <SubTabs value={sub || "sources"} onChange={setSub} items={[["sources", "Data sources"], ["rules", "Automation"], ["history", "History"]]} />
+              {(sub || "sources") === "sources" && (
+                <Panel title="Data sources">
+                  <ul className="divide-y divide-border">
+                    {sources.map((s) => (
+                      <li key={s.name} className="px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <Plug className="w-4 h-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-[13px] text-foreground">{s.name}</p>
+                            <p className="text-[12px] text-muted-foreground">{s.state}</p>
+                          </div>
+                        </div>
+                        {s.state === "Connected"
+                          ? <span className="text-[12px] text-success inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Active</span>
+                          : <button onClick={() => toast("Connection flow is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect</button>}
+                      </li>
+                    ))}
+                  </ul>
+                </Panel>
+              )}
+              {sub === "rules" && (
+                <Panel title="Automation rules">
+                  <ul className="divide-y divide-border">
+                    <Rule label="Weekly scan" desc="Every Monday at 06:00. Results land in Findings." defaultOn />
+                    <Rule label="Auto-apply alt text" desc="Fill missing image alt text without asking." />
+                    <Rule label="Auto-apply search titles & descriptions" desc="Only for products with none set. Never overwrites your text." />
+                    <Rule label="Always ask before changing URLs" desc="URL changes need a redirect and can't be auto-applied." defaultOn locked />
+                    <Rule label="Never touch prices, stock or descriptions" desc="Autopilot can only suggest these." defaultOn locked />
+                    <Rule label="Never invent facts" desc="Drafts use only catalog data. Missing info becomes a question." defaultOn locked />
+                  </ul>
+                </Panel>
+              )}
+              {sub === "history" && <Panel title="Change history"><ActivityList log={log} /></Panel>}
+            </>
+          )}
+        </div>
+      </div>
 
       {/* finding detail */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
@@ -738,7 +1005,7 @@ function SeoPage() {
                       {detail.safe ? "Approve & apply" : "I've checked — apply"}
                     </button>
                   )}
-                  {s === "open" && detail.needsHuman && <button onClick={() => { setDetail(null); setTab("content"); }} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Open brief</button>}
+                  {s === "open" && detail.needsHuman && <button onClick={() => { setDetail(null); setTab("content"); setSub("briefs"); }} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Open brief</button>}
                   {s !== "open" && <span className="text-[12px] text-muted-foreground self-center">{s === "verified" ? "Verified live" : s === "verifying" ? "Applied · waiting for next scan" : "Dismissed"}</span>}
                 </div>
               </>
