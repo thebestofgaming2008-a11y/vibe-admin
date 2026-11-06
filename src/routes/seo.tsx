@@ -501,7 +501,7 @@ function SeoPage() {
           {tab === "overview" && (
             <>
               <SectionHead title="Overview" desc="How the store is doing in search, and the few things worth doing next." />
-              <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-4">
+              <div className="grid grid-cols-1 xl:grid-cols-[auto_1fr] gap-4">
                 <div className="rounded-lg bg-card border border-border p-5 flex items-center gap-5">
                   <ScoreRing score={score} />
                   <div>
