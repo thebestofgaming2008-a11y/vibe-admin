@@ -1077,10 +1077,10 @@ function CheckIcon({ status }: { status: CheckStatus }) {
   return <Minus className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />;
 }
 
-function Panel({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
+function Panel({ title, children, className = "", action }: { title: string; children: React.ReactNode; className?: string; action?: React.ReactNode }) {
   return (
     <div className={`rounded-lg bg-card border border-border overflow-hidden ${className}`}>
-      <div className="px-4 sm:px-5 py-3 border-b border-border"><h3 className="text-[13px] font-medium text-foreground">{title}</h3></div>
+      <div className="px-4 sm:px-5 py-3 border-b border-border flex items-center justify-between gap-3"><h3 className="text-[13px] font-medium text-foreground">{title}</h3>{action}</div>
       {children}
     </div>
   );
