@@ -9,6 +9,10 @@ export const Route = createFileRoute("/customers")({
     meta: [
       { title: "Customers — Store Management" },
       { name: "description", content: "View and manage your customers" },
+      { property: "og:title", content: "Customers — Store Management" },
+      { property: "og:description", content: "View and manage your customers" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

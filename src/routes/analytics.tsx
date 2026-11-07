@@ -20,6 +20,10 @@ export const Route = createFileRoute("/analytics")({
     meta: [
       { title: "Analytics — Store Management" },
       { name: "description", content: "Sales and customer analytics for your store" },
+      { property: "og:title", content: "Analytics — Store Management" },
+      { property: "og:description", content: "Sales and customer analytics for your store" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

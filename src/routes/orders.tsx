@@ -22,6 +22,10 @@ export const Route = createFileRoute("/orders")({
     meta: [
       { title: "Orders — Store Management" },
       { name: "description", content: "Manage and fulfill customer orders" },
+      { property: "og:title", content: "Orders — Store Management" },
+      { property: "og:description", content: "Manage and fulfill customer orders" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

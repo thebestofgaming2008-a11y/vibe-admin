@@ -26,6 +26,10 @@ export const Route = createFileRoute("/products")({
     meta: [
       { title: "Products — Store Management" },
       { name: "description", content: "Manage your store catalog" },
+      { property: "og:title", content: "Products — Store Management" },
+      { property: "og:description", content: "Manage your store catalog" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

@@ -15,6 +15,10 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "Admin Dashboard — Store Management" },
       { name: "description", content: "Modern admin dashboard for webshop management" },
+      { property: "og:title", content: "Admin Dashboard — Store Management" },
+      { property: "og:description", content: "Modern admin dashboard for webshop management" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
