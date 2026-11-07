@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ArrowUpRight, Check, ChevronRight, FileText, Pause, Play, RotateCcw, Search, ShieldCheck, ShoppingBag, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -56,7 +56,7 @@ function Spark({ points, strong }: { points: number[]; strong?: boolean }) {
   );
 }
 
-function Card({ title, sub, badge, children, className = "" }: { title: string; sub: string; badge?: React.ReactNode; children: React.ReactNode; className?: string }) {
+function Card({ title, sub, badge, children, className = "" }: { title: string; sub: string; badge?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <section className={`flex min-w-0 flex-col rounded-2xl border border-border/70 bg-card p-5 shadow-soft sm:p-6 ${className}`}>
       <div className="flex items-start justify-between gap-3">
@@ -71,7 +71,7 @@ function Card({ title, sub, badge, children, className = "" }: { title: string; 
   );
 }
 
-const Pill = ({ children, tone = "neutral" }: { children: React.ReactNode; tone?: "neutral" | "success" }) => (
+const Pill = ({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" }) => (
   <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] ${tone === "success" ? "border-success/25 bg-success/10 text-success" : "border-border bg-background text-muted-foreground"}`}>{children}</span>
 );
 
