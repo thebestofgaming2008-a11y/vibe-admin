@@ -128,7 +128,7 @@ export function SeoAgent({ onReview, onResults }: { onReview: () => void; onResu
       </section>
 
       {/* Three working panels */}
-      <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2 2xl:grid-cols-[1fr_0.95fr_1.15fr]">
+      <div className="grid min-w-0 grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2 xl:grid-cols-[1fr_0.95fr_1.1fr]">
         <Card title="Trending near you" sub="Google searches · last 7 days · India" badge={<Pill tone="success">1 picked</Pill>}>
           <div className="mt-5 grid grid-cols-[minmax(0,1fr)_36px_56px_52px] gap-2 px-3 text-[10px] uppercase tracking-wide text-muted-foreground">
             <span>Search</span><span className="text-right">Vol/mo</span><span className="text-center">Trend</span><span className="text-right">7 days</span>
@@ -139,7 +139,7 @@ export function SeoAgent({ onReview, onResults }: { onReview: () => void; onResu
               return (
                 <li key={t.query}>
                   <button type="button" onClick={() => setDetail(i)} className={`grid w-full grid-cols-[minmax(0,1fr)_36px_56px_52px] items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all ${on ? "border-border bg-card shadow-lift" : "border-transparent hover:bg-muted/60"}`}>
-                    <span className={`min-w-0 truncate text-[13px] ${on ? "font-medium text-foreground" : "text-foreground/80"}`}>{t.query}</span>
+                    <span className={`min-w-0 text-[13px] leading-5 sm:truncate ${on ? "font-medium text-foreground" : "text-foreground/80"}`}>{t.query}</span>
                     <span className="text-right text-[11px] tabular-nums text-muted-foreground">{t.volume}</span>
                     <span className="flex justify-center"><Spark points={t.points} strong={on} /></span>
                     <span className="flex justify-end">
@@ -181,7 +181,7 @@ export function SeoAgent({ onReview, onResults }: { onReview: () => void; onResu
           </div>
         </Card>
 
-        <Card title="Page builder" sub="Written from your catalog facts · nothing invented" badge={builderBadge} className="lg:col-span-2 2xl:col-span-1">
+        <Card title="Page builder" sub="Written from your catalog facts · nothing invented" badge={builderBadge} className="lg:col-span-2 xl:col-span-1">
           <div className="mt-5 overflow-hidden rounded-xl border border-border bg-card">
             <div className="flex items-center gap-1.5 border-b border-border bg-muted/50 px-3 py-2">
               <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" /><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" /><span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/30" />
