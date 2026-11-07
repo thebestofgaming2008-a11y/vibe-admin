@@ -431,16 +431,23 @@ function SeoPage() {
   const go = (s: Section, sub?: string) => { setTab(s); setSub(sub ?? ""); };
 
   return (
-    <AdminShell title="SEO Autopilot">
-      <div className="seo-workspace mx-auto w-full max-w-[1500px] space-y-7">
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-          <div className="min-w-0 flex items-center gap-2 text-xs text-muted-foreground"><Globe className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{DOMAIN}</span><span className="shrink-0 border-l border-border pl-2">Demo workspace</span></div>
-          <Button variant="ghost" size="sm" onClick={runScan} disabled={scanning} className="text-muted-foreground"><RefreshCw className={scanning ? "animate-spin" : ""} /><span>{scanning ? "Scanning…" : "Scan site"}</span></Button>
+    <AdminShell title="SEO Autopilot" mainClassName="bg-canvas">
+      <div className="seo-workspace mx-auto w-full max-w-[1500px] space-y-5">
+        <header className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+          <div className="min-w-0">
+            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground"><Globe className="h-3 w-3 shrink-0" /><span className="truncate">Growth · {DOMAIN} · demo</span></p>
+            <h1 className="mt-1 text-2xl font-normal tracking-tight text-foreground sm:text-3xl">SEO Agent</h1>
+          </div>
+          <Button variant="outline" size="sm" onClick={runScan} disabled={scanning} className="rounded-full bg-card"><RefreshCw className={scanning ? "animate-spin" : ""} /><span>{scanning ? "Scanning…" : "Scan site"}</span></Button>
+        </header>
+        <div className="space-y-3">
+          <nav aria-label="SEO sections" className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+            <div className="inline-flex shrink-0 gap-1 rounded-full border border-border/70 bg-card p-1 shadow-soft">
+              {groups.map((group) => <button type="button" key={group.label} onClick={() => go(group.sections[0].id)} aria-pressed={activeGroup.label === group.label} className={`rounded-full px-3.5 py-1.5 text-xs transition-colors sm:px-4 sm:text-[13px] ${activeGroup.label === group.label ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"}`}>{group.label}</button>)}
+            </div>
+          </nav>
+          {activeGroup.sections.length > 1 && <nav aria-label={`${activeGroup.label} sections`} className="flex gap-5 overflow-x-auto border-b border-border">{activeGroup.sections.map((section) => <button type="button" key={section.id} aria-pressed={tab === section.id} onClick={() => go(section.id)} className={`-mb-px shrink-0 border-b-2 pb-2.5 text-[13px] transition-colors ${tab === section.id ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}>{section.label}</button>)}</nav>}
         </div>
-        <nav aria-label="SEO sections" className="grid grid-cols-5 border-b border-border">
-          {groups.map((group) => <Button key={group.label} variant="ghost" onClick={() => go(group.sections[0].id)} aria-pressed={activeGroup.label === group.label} className={`h-11 rounded-none px-1 text-xs sm:text-sm hover:bg-transparent ${activeGroup.label === group.label ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"}`}>{group.label}</Button>)}
-        </nav>
-        {activeGroup.sections.length > 1 && <nav aria-label={`${activeGroup.label} sections`} className="flex flex-wrap gap-2">{activeGroup.sections.map((section) => <Button key={section.id} variant={tab === section.id ? "secondary" : "ghost"} size="sm" aria-pressed={tab === section.id} onClick={() => go(section.id)}>{section.label}</Button>)}</nav>}
         <div className="min-w-0 space-y-6">
           {tab === "overview" && <SeoAgent onReview={() => go("settings", "rules")} onResults={() => go("performance")} />}
 
