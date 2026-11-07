@@ -9,6 +9,10 @@ export const Route = createFileRoute("/settings")({
     meta: [
       { title: "Settings — Store Management" },
       { name: "description", content: "Manage your store settings" },
+      { property: "og:title", content: "Settings — Store Management" },
+      { property: "og:description", content: "Manage your store settings" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

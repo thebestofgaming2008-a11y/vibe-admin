@@ -25,6 +25,10 @@ export const Route = createFileRoute("/shipping")({
     meta: [
       { title: "Shipping — Store Management" },
       { name: "description", content: "Manage carrier rates and product shipping fees" },
+      { property: "og:title", content: "Shipping — Store Management" },
+      { property: "og:description", content: "Manage carrier rates and product shipping fees" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

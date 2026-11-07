@@ -8,6 +8,10 @@ export const Route = createFileRoute("/reviews")({
     meta: [
       { title: "Reviews — Store Management" },
       { name: "description", content: "Customer reviews and feedback" },
+      { property: "og:title", content: "Reviews — Store Management" },
+      { property: "og:description", content: "Customer reviews and feedback" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });

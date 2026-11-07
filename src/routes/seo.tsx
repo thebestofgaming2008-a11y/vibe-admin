@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { SeoAgent } from "@/components/admin/SeoAgent";
+import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { TrendChart } from "@/components/admin/TrendChart";
@@ -296,7 +298,7 @@ const calendar = [
 function SectionHead({ title, desc }: { title: string; desc: string }) {
   return (
     <div>
-      <h2 className="text-[17px] font-semibold tracking-tight text-foreground">{title}</h2>
+      <h2 className="text-[17px] font-semibold text-foreground">{title}</h2>
       <p className="text-[13px] text-muted-foreground mt-0.5">{desc}</p>
     </div>
   );
@@ -306,8 +308,8 @@ function SubTabs({ value, onChange, items }: { value: string; onChange: (v: stri
     <div className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
       <div className="inline-flex gap-1 p-1 rounded-lg bg-surface border border-border w-max">
         {items.map(([v, l]) => (
-          <button key={v} onClick={() => onChange(v)}
-            className={`h-8 px-3 rounded-md text-[12px] whitespace-nowrap transition-colors ${value === v ? "bg-card text-foreground font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{l}</button>
+          <Button variant="ghost" key={v} onClick={() => onChange(v)}
+            className={`h-8 px-3 rounded-md text-[12px] whitespace-nowrap transition-colors ${value === v ? "bg-card text-foreground font-medium shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>{l}</Button>
         ))}
       </div>
     </div>
@@ -315,7 +317,7 @@ function SubTabs({ value, onChange, items }: { value: string; onChange: (v: stri
 }
 function Kpi({ label, value, delta, negative }: { label: string; value: string; delta?: string; negative?: boolean }) {
   return (
-    <div className="rounded-lg bg-card border border-border p-4 min-w-0">
+    <div className="border-b border-border py-4 min-w-0">
       <p className="text-[12px] text-muted-foreground truncate">{label}</p>
       <p className="text-[20px] font-semibold tabular-nums text-foreground mt-1">{value}</p>
       {delta && <p className={`text-[11px] tabular-nums ${negative ? "text-destructive" : "text-success"}`}>{delta} vs last 30d</p>}
@@ -405,7 +407,7 @@ function SeoPage() {
       source: "Autopilot", finding: f,
     }));
     const standing = [
-      { id: "t-gsc", title: "Connect Search Console", detail: "Unlocks real clicks, impressions and positions", priority: "High", source: "Autopilot", finding: null },
+      { id: "t-gsc", title: "Review Search Console connection", detail: "Demo connection · no real data is synced", priority: "High", source: "Autopilot", finding: null },
       { id: "t-intro", title: "Write the Books collection intro", detail: "Brief is ready in the Content tab", priority: "Medium", source: "Autopilot", finding: null },
       { id: "t-weekly", title: "Review this week's scan", detail: "Every Monday · 5 min", priority: "Low", source: "Routine", finding: null },
       { id: "t-new", title: "Check new products for missing SEO fields", detail: "Runs after every catalog change", priority: "Low", source: "Routine", finding: null },
@@ -418,136 +420,29 @@ function SeoPage() {
   const totalClicks = traffic.reduce((a, d) => a + d.visitors, 0);
   const totalImpr = traffic.reduce((a, d) => a + d.revenue, 0);
 
-  const nav: { group: string; items: { id: Section; label: string; icon: typeof Globe; count?: number }[] }[] = [
-    { group: "Home", items: [{ id: "overview", label: "Overview", icon: LayoutGrid }] },
-    { group: "Work", items: [
-      { id: "tasks", label: "To-do", icon: ListChecks, count: openTasks.length },
-      { id: "findings", label: "Findings", icon: AlertTriangle, count: open.length },
-      { id: "queue", label: "Fix queue", icon: Sparkles, count: safeBatch.length },
-    ] },
-    { group: "Site", items: [
-      { id: "technical", label: "Technical", icon: ShieldCheck },
-      { id: "pages", label: "Pages", icon: FileText },
-    ] },
-    { group: "Growth", items: [
-      { id: "keywords", label: "Keywords", icon: Search },
-      { id: "content", label: "Content", icon: BookOpen },
-      { id: "competitors", label: "Competitors & links", icon: Link2 },
-    ] },
-    { group: "Results", items: [
-      { id: "performance", label: "Performance", icon: BarChart3 },
-      { id: "reports", label: "Reports", icon: FileBarChart },
-    ] },
-    { group: "Setup", items: [{ id: "settings", label: "Settings", icon: Settings2 }] },
+  const groups: { label: string; sections: { id: Section; label: string }[] }[] = [
+    { label: "Agent", sections: [{ id: "overview", label: "Live agent" }] },
+    { label: "Website", sections: [{ id: "technical", label: "Site health" }, { id: "pages", label: "Pages" }, { id: "findings", label: "Findings" }] },
+    { label: "Growth", sections: [{ id: "keywords", label: "Keywords" }, { id: "content", label: "Content" }, { id: "competitors", label: "Competitors & links" }] },
+    { label: "Results", sections: [{ id: "performance", label: "Performance" }, { id: "reports", label: "Reports" }] },
+    { label: "Controls", sections: [{ id: "queue", label: "Review queue" }, { id: "tasks", label: "To-do" }, { id: "settings", label: "Settings" }] },
   ];
-  const flat = nav.flatMap((g) => g.items);
+  const activeGroup = groups.find((group) => group.sections.some((section) => section.id === tab)) ?? groups[0];
   const go = (s: Section, sub?: string) => { setTab(s); setSub(sub ?? ""); };
 
   return (
-    <AdminShell title="SEO Autopilot" subtitle="Find, fix and verify what helps shoppers find you">
-      {/* compact store bar */}
-      <div className="rounded-lg bg-card border border-border px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-md bg-surface flex items-center justify-center shrink-0"><Globe className="w-4 h-4 text-muted-foreground" /></div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-medium text-foreground truncate">{DOMAIN}</p>
-            <p className="text-[11px] text-muted-foreground">Scanned {lastScan} · 38 URLs · {products.length} products · <span className="text-foreground/70">demo data</span></p>
-          </div>
+    <AdminShell title="SEO Autopilot">
+      <div className="seo-workspace mx-auto w-full max-w-[1500px] space-y-7">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+          <div className="min-w-0 flex items-center gap-2 text-xs text-muted-foreground"><Globe className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{DOMAIN}</span><span className="shrink-0 border-l border-border pl-2">Demo workspace</span></div>
+          <Button variant="ghost" size="sm" onClick={runScan} disabled={scanning} className="text-muted-foreground"><RefreshCw className={scanning ? "animate-spin" : ""} /><span>{scanning ? "Scanning…" : "Scan site"}</span></Button>
         </div>
-        <button onClick={runScan} disabled={scanning}
-          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium disabled:opacity-60">
-          <RefreshCw className={`w-4 h-4 ${scanning ? "animate-spin" : ""}`} /> {scanning ? "Scanning…" : "Run scan"}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-[200px_minmax(0,1fr)] gap-6">
-        {/* inner nav — desktop */}
-        <aside className="hidden lg:block">
-          <nav className="sticky top-4 space-y-5">
-            {nav.map((g) => (
-              <div key={g.group}>
-                <p className="px-2 mb-1 text-[10px] font-medium uppercase tracking-widest text-muted-foreground">{g.group}</p>
-                <ul className="space-y-px">
-                  {g.items.map((it) => (
-                    <li key={it.id}>
-                      <button onClick={() => go(it.id)}
-                        className={`w-full flex items-center gap-2.5 rounded-md px-2.5 py-[7px] text-[13px] transition-colors ${tab === it.id ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
-                        <it.icon className="w-[15px] h-[15px] shrink-0" />
-                        <span className="flex-1 text-left">{it.label}</span>
-                        {!!it.count && <span className="text-[10px] tabular-nums text-muted-foreground bg-surface px-1.5 py-0.5 rounded">{it.count}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </nav>
-        </aside>
-
-        {/* inner nav — mobile */}
-        <div className="lg:hidden -mx-4 px-4 overflow-x-auto">
-          <div className="flex gap-1.5 w-max">
-            {flat.map((it) => (
-              <button key={it.id} onClick={() => go(it.id)}
-                className={`h-8 px-3 rounded-full text-[12px] border whitespace-nowrap inline-flex items-center gap-1.5 ${tab === it.id ? "bg-foreground text-background border-foreground" : "border-border text-muted-foreground"}`}>
-                {it.label}{!!it.count && <span className="tabular-nums opacity-70">{it.count}</span>}
-              </button>
-            ))}
-          </div>
-        </div>
-
+        <nav aria-label="SEO sections" className="grid grid-cols-5 border-b border-border">
+          {groups.map((group) => <Button key={group.label} variant="ghost" onClick={() => go(group.sections[0].id)} aria-pressed={activeGroup.label === group.label} className={`h-11 rounded-none px-1 text-xs sm:text-sm hover:bg-transparent ${activeGroup.label === group.label ? "border-b-2 border-foreground text-foreground" : "text-muted-foreground"}`}>{group.label}</Button>)}
+        </nav>
+        {activeGroup.sections.length > 1 && <nav aria-label={`${activeGroup.label} sections`} className="flex flex-wrap gap-2">{activeGroup.sections.map((section) => <Button key={section.id} variant={tab === section.id ? "secondary" : "ghost"} size="sm" aria-pressed={tab === section.id} onClick={() => go(section.id)}>{section.label}</Button>)}</nav>}
         <div className="min-w-0 space-y-6">
-          {/* OVERVIEW */}
-          {tab === "overview" && (
-            <>
-              <SectionHead title="Overview" desc="How the store is doing in search, and the few things worth doing next." />
-              <div className="grid grid-cols-1 xl:grid-cols-[auto_1fr] gap-4">
-                <div className="rounded-lg bg-card border border-border p-5 flex items-center gap-5">
-                  <ScoreRing score={score} />
-                  <div>
-                    <p className="text-[13px] font-medium text-foreground">Store health</p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">{count("error")} errors · {count("warning")} warnings</p>
-                    <p className="text-[12px] text-muted-foreground">{passed} checks passed</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <Kpi label="Clicks · 30d" value={totalClicks.toLocaleString()} delta="+18%" />
-                  <Kpi label="Impressions" value={`${(totalImpr / 1000).toFixed(1)}k`} delta="+24%" />
-                  <Kpi label="Avg. position" value="14.2" delta="+2.1" />
-                  <Kpi label="Indexed pages" value="34/38" />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
-                <Panel title="Next best actions" className="xl:col-span-3"
-                  action={<button onClick={() => go("findings")} className="text-[12px] text-muted-foreground hover:text-foreground">See all</button>}>
-                  {open.length === 0 ? <Empty text="Nothing open. Run a scan after your next catalog change." /> : (
-                    <ul className="divide-y divide-border">
-                      {[...open].sort((a, b) => order(a) - order(b)).slice(0, 3).map((f) => (
-                        <FindingRow key={f.id} f={f} onClick={() => setDetail(f)} />
-                      ))}
-                    </ul>
-                  )}
-                  {safeBatch.length > 0 && (
-                    <div className="px-4 sm:px-5 py-3 border-t border-border flex items-center justify-between gap-3 flex-wrap bg-surface/50">
-                      <p className="text-[12px] text-muted-foreground">{safeBatch.length} safe fixes ready to apply</p>
-                      <button onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md bg-foreground text-background text-[12px] font-medium inline-flex items-center gap-1.5">
-                        <Eye className="w-3.5 h-3.5" /> Review & apply
-                      </button>
-                    </div>
-                  )}
-                </Panel>
-                <Panel title="Recent activity" className="xl:col-span-2">
-                  <ActivityList log={log.slice(0, 5)} />
-                </Panel>
-              </div>
-
-              <Panel title="Clicks from Google · 30 days"
-                action={<button onClick={() => go("performance")} className="text-[12px] text-muted-foreground hover:text-foreground">Details</button>}>
-                <div className="p-4"><TrendChart data={traffic} dataKey="visitors" height={170} formatValue={(n) => `${n} clicks`} /></div>
-              </Panel>
-            </>
-          )}
+          {tab === "overview" && <SeoAgent onReview={() => go("settings", "rules")} onResults={() => go("performance")} />}
 
           {/* TO-DO */}
           {tab === "tasks" && (
@@ -564,17 +459,17 @@ function SeoPage() {
                         const isDone = !!done[t.id];
                         return (
                           <li key={t.id} className="px-4 sm:px-5 py-3.5 flex items-start gap-3">
-                            <button onClick={() => { setDone((d) => ({ ...d, [t.id]: !d[t.id] })); if (!isDone) addLog(`Task done: ${t.title}`, "applied"); }}
+                            <Button variant="ghost" onClick={() => { setDone((d) => ({ ...d, [t.id]: !d[t.id] })); if (!isDone) addLog(`Task done: ${t.title}`, "applied"); }}
                               className="mt-0.5 shrink-0 text-muted-foreground hover:text-foreground" aria-label={isDone ? "Mark not done" : "Mark done"}>
                               {isDone ? <CircleCheck className="w-[18px] h-[18px] text-success" /> : <Circle className="w-[18px] h-[18px]" />}
-                            </button>
+                            </Button>
                             <div className="flex-1 min-w-0">
                               <p className={`text-[13px] ${isDone ? "text-muted-foreground line-through" : "text-foreground"}`}>{t.title}</p>
                               <p className="text-[12px] text-muted-foreground">{t.detail}</p>
                             </div>
                             <div className="flex items-center gap-2 shrink-0">
                               <Pill tone={t.priority === "High" ? "text-destructive" : t.priority === "Medium" ? "text-warning" : "text-muted-foreground"}>{t.priority}</Pill>
-                              {t.finding && <button onClick={() => setDetail(t.finding)} className="text-[12px] text-foreground underline underline-offset-2">Open</button>}
+                              {t.finding && <Button variant="ghost" onClick={() => setDetail(t.finding)} className="text-[12px] text-foreground underline underline-offset-2">Open</Button>}
                             </div>
                           </li>
                         );
@@ -619,7 +514,7 @@ function SeoPage() {
                 <SectionHead title="Fix queue" desc="Fixes sorted by how much attention they need from you." />
                 <SubTabs value={k} onChange={setSub} items={(Object.keys(lanes) as (keyof typeof lanes)[]).map((x) => [x, `${lanes[x].title} · ${lanes[x].items.length}`])} />
                 <Lane title={lanes[k].title} hint={lanes[k].hint} items={[...lanes[k].items]} onOpen={setDetail} statusOf={k === "applied" ? st : undefined}
-                  action={k === "now" && safeBatch.length ? <button onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md bg-foreground text-background text-[12px] font-medium">Review all</button> : null} />
+                  action={k === "now" && safeBatch.length ? <Button variant="ghost" onClick={() => setReview(safeBatch)} className="h-8 px-3 rounded-md bg-foreground text-background text-[12px] font-medium">Review all</Button> : null} />
               </>
             );
           })()}
@@ -664,7 +559,7 @@ function SeoPage() {
                 <SectionHead title="Pages" desc="Every public page, its search status and how it performs." />
                 <SubTabs value={f0} onChange={setSub} items={[["all", `All · ${pages.length}`], ["issues", `With issues · ${pages.filter((p) => p.issues).length}`], ["Product", "Products"], ["Collection", "Collections"], ["Page", "Other"]]} />
                 <Panel title={`${list.length} pages`}>
-                  <div className="hidden md:grid grid-cols-[minmax(0,1fr)_90px_80px_70px_70px] gap-3 px-5 py-2 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border">
+                  <div className="hidden md:grid grid-cols-[minmax(0,1fr)_90px_80px_70px_70px] gap-3 px-5 py-2 text-[11px] uppercase text-muted-foreground border-b border-border">
                     <span>Page</span><span>Index</span><span className="text-right">Clicks</span><span className="text-right">Position</span><span className="text-right">Issues</span>
                   </div>
                   <ul className="divide-y divide-border">
@@ -762,7 +657,7 @@ function SeoPage() {
                     {calendar.map((c) => (
                       <li key={c.title} className="px-4 sm:px-5 py-3.5 flex items-center gap-4">
                         <div className="w-14 shrink-0 text-center">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.month}</p>
+                          <p className="text-[10px] uppercase text-muted-foreground">{c.month}</p>
                           <p className="text-[18px] font-semibold tabular-nums text-foreground leading-tight">{c.day}</p>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -848,7 +743,7 @@ function SeoPage() {
           {/* PERFORMANCE */}
           {tab === "performance" && (
             <>
-              <SectionHead title="Performance" desc="Real results from Google, and how the store's SEO health is trending." />
+              <SectionHead title="Performance" desc="Sample search results and SEO health trends." />
               <SubTabs value={sub || "search"} onChange={setSub} items={[["search", "Search traffic"], ["health", "SEO health"]]} />
               {(sub || "search") === "search" ? (
                 <>
@@ -906,9 +801,9 @@ function SeoPage() {
                           <p className="text-[13px] text-foreground">{r.week}</p>
                           <p className="text-[12px] text-muted-foreground">{r.fixes} fixes · {r.highlight}</p>
                         </div>
-                        <button onClick={() => toast("PDF export is part of the full build")} className="h-8 px-2.5 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5 shrink-0">
+                        <Button variant="ghost" onClick={() => toast("PDF export is part of the full build")} className="h-8 px-2.5 rounded-md border border-border text-[12px] text-foreground inline-flex items-center gap-1.5 shrink-0">
                           <Download className="w-3.5 h-3.5" /> <span className="hidden sm:inline">PDF</span>
-                        </button>
+                        </Button>
                       </li>
                     ))}
                   </ul>
@@ -923,9 +818,9 @@ function SeoPage() {
                       <p>Biggest win: {reports[0].highlight}.</p>
                     </div>
                     <div className="flex justify-end">
-                      <button onClick={() => toast("Email sharing is part of the full build")} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium inline-flex items-center gap-1.5">
+                      <Button variant="ghost" onClick={() => toast("Email sharing is part of the full build")} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium inline-flex items-center gap-1.5">
                         <ArrowUpRight className="w-3.5 h-3.5" /> Send to client
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </Panel>
@@ -952,7 +847,7 @@ function SeoPage() {
                         </div>
                         {s.state === "Connected"
                           ? <span className="text-[12px] text-success inline-flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Active</span>
-                          : <button onClick={() => toast("Connection flow is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect</button>}
+                          : <Button variant="ghost" onClick={() => toast("Connection flow is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Connect</Button>}
                       </li>
                     ))}
                   </ul>
@@ -978,7 +873,7 @@ function SeoPage() {
 
       {/* finding detail */}
       <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[85dvh] overflow-y-auto">
           {detail && (() => {
             const m = sevMeta[detail.severity];
             const s = st(detail);
@@ -999,13 +894,13 @@ function SeoPage() {
                   {detail.changes && <Diff changes={detail.changes} />}
                 </div>
                 <div className="flex flex-wrap justify-end gap-2 pt-2">
-                  {s === "open" && <button onClick={() => dismiss(detail)} className="h-9 px-3 rounded-md border border-border text-[13px] text-muted-foreground">Not applicable</button>}
+                  {s === "open" && <Button variant="ghost" onClick={() => dismiss(detail)} className="h-9 px-3 rounded-md border border-border text-[13px] text-muted-foreground">Not applicable</Button>}
                   {s === "open" && detail.changes && !detail.needsHuman && (
-                    <button onClick={() => apply([detail])} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">
+                    <Button variant="ghost" onClick={() => apply([detail])} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">
                       {detail.safe ? "Approve & apply" : "I've checked — apply"}
-                    </button>
+                    </Button>
                   )}
-                  {s === "open" && detail.needsHuman && <button onClick={() => { setDetail(null); setTab("content"); setSub("briefs"); }} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Open brief</button>}
+                  {s === "open" && detail.needsHuman && <Button variant="ghost" onClick={() => { setDetail(null); setTab("content"); setSub("briefs"); }} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Open brief</Button>}
                   {s !== "open" && <span className="text-[12px] text-muted-foreground self-center">{s === "verified" ? "Verified live" : s === "verifying" ? "Applied · waiting for next scan" : "Dismissed"}</span>}
                 </div>
               </>
@@ -1019,7 +914,7 @@ function SeoPage() {
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-[16px]">Review {review?.length} changes</DialogTitle>
-            <DialogDescription className="text-[12px]">Only empty or off-length fields are filled. Your descriptions, URLs, prices and stock are not touched. Every change is logged and can be undone.</DialogDescription>
+            <DialogDescription className="text-[12px]">Only empty or off-length fields are filled. Your descriptions, URLs, prices and stock are not touched. Every change is logged in this demo.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
             {review?.map((f) => (
@@ -1030,8 +925,8 @@ function SeoPage() {
             ))}
           </div>
           <div className="flex justify-end gap-2 pt-2">
-            <button onClick={() => setReview(null)} className="h-9 px-3 rounded-md border border-border text-[13px] text-muted-foreground">Cancel</button>
-            <button onClick={() => review && apply(review)} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Apply {review?.length}</button>
+            <Button variant="ghost" onClick={() => setReview(null)} className="h-9 px-3 rounded-md border border-border text-[13px] text-muted-foreground">Cancel</Button>
+            <Button variant="ghost" onClick={() => review && apply(review)} className="h-9 px-3 rounded-md bg-foreground text-background text-[13px] font-medium">Apply {review?.length}</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1044,7 +939,7 @@ const order = (f: Finding) => ({ error: 0, warning: 1, opportunity: 2 })[f.sever
 
 function Stat({ label, value, tone }: { label: string; value: number; tone: string }) {
   return (
-    <div className="rounded-lg bg-card border border-border p-4">
+    <div className="border-b border-border py-4 min-w-0">
       <p className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5"><span className={`w-1.5 h-1.5 rounded-full bg-current ${tone}`} />{label}</p>
       <p className="text-[24px] font-semibold tabular-nums text-foreground mt-1">{value}</p>
     </div>
@@ -1079,8 +974,8 @@ function CheckIcon({ status }: { status: CheckStatus }) {
 
 function Panel({ title, children, className = "", action }: { title: string; children: React.ReactNode; className?: string; action?: React.ReactNode }) {
   return (
-    <div className={`rounded-lg bg-card border border-border overflow-hidden ${className}`}>
-      <div className="px-4 sm:px-5 py-3 border-b border-border flex items-center justify-between gap-3"><h3 className="text-[13px] font-medium text-foreground">{title}</h3>{action}</div>
+    <div className={`border-y border-border overflow-hidden ${className}`}>
+      <div className="px-1 py-4 border-b border-border grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3"><h3 className="min-w-0 text-[13px] font-medium text-foreground">{title}</h3>{action}</div>
       {children}
     </div>
   );
@@ -1092,7 +987,7 @@ function FindingRow({ f, onClick, showSource }: { f: Finding; onClick: () => voi
   const m = sevMeta[f.severity];
   return (
     <li>
-      <button onClick={onClick} className="w-full flex items-start gap-3 px-4 sm:px-5 py-3 text-left hover:bg-accent/50">
+      <Button variant="ghost" onClick={onClick} className="w-full flex items-start gap-3 px-4 sm:px-5 py-3 text-left hover:bg-accent/50">
         <m.icon className={`w-4 h-4 mt-0.5 shrink-0 ${m.cls}`} />
         <div className="flex-1 min-w-0">
           <p className="text-[13px] text-foreground">{f.title}</p>
@@ -1100,7 +995,7 @@ function FindingRow({ f, onClick, showSource }: { f: Finding; onClick: () => voi
         </div>
         {f.safe && <span className="hidden sm:inline text-[11px] text-muted-foreground border border-border rounded px-1.5 py-0.5 shrink-0">Safe fix</span>}
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-      </button>
+      </Button>
     </li>
   );
 }
@@ -1109,10 +1004,10 @@ function Lane({ title, hint, items, onOpen, action, statusOf }: {
   title: string; hint: string; items: Finding[]; onOpen: (f: Finding) => void; action?: React.ReactNode; statusOf?: (f: Finding) => FixState;
 }) {
   return (
-    <div className="rounded-lg bg-card border border-border overflow-hidden">
+    <div className="border-y border-border overflow-hidden">
       <div className="px-4 sm:px-5 py-3 border-b border-border flex items-center justify-between gap-2">
         <div>
-          <h3 className="text-[13px] font-medium text-foreground">{title} <span className="text-muted-foreground tabular-nums">{items.length}</span></h3>
+          <h3 className="min-w-0 text-[13px] font-medium text-foreground">{title} <span className="text-muted-foreground tabular-nums">{items.length}</span></h3>
           <p className="text-[11px] text-muted-foreground">{hint}</p>
         </div>
         {action}
@@ -1121,7 +1016,7 @@ function Lane({ title, hint, items, onOpen, action, statusOf }: {
         <ul className="divide-y divide-border">
           {items.map((f) => (
             <li key={f.id}>
-              <button onClick={() => onOpen(f)} className="w-full flex items-center gap-2 px-4 sm:px-5 py-2.5 text-left hover:bg-accent/50">
+              <Button variant="ghost" onClick={() => onOpen(f)} className="w-full flex items-center gap-2 px-4 sm:px-5 py-2.5 text-left hover:bg-accent/50">
                 <span className="flex-1 min-w-0">
                   <span className="block text-[13px] text-foreground truncate">{f.title}</span>
                   <span className="block text-[11px] text-muted-foreground truncate">{f.where}</span>
@@ -1129,7 +1024,7 @@ function Lane({ title, hint, items, onOpen, action, statusOf }: {
                 {statusOf && (statusOf(f) === "verified"
                   ? <span className="text-[11px] text-success inline-flex items-center gap-1 shrink-0"><ShieldCheck className="w-3.5 h-3.5" /> Verified</span>
                   : <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1 shrink-0"><Clock className="w-3.5 h-3.5" /> Pending</span>)}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
@@ -1153,7 +1048,7 @@ function Diff({ changes }: { changes: Change[] }) {
 }
 
 const Block = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div><p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-0.5">{label}</p><div className="text-foreground">{children}</div></div>
+  <div><p className="text-[11px] uppercase text-muted-foreground mb-0.5">{label}</p><div className="text-foreground">{children}</div></div>
 );
 
 function ActivityList({ log }: { log: LogEntry[] }) {
@@ -1163,10 +1058,10 @@ function ActivityList({ log }: { log: LogEntry[] }) {
       {log.map((l, i) => {
         const I = icon[l.kind];
         return (
-          <li key={i} className="px-4 sm:px-5 py-2.5 flex items-center gap-3">
+          <li key={i} className="px-4 sm:px-5 py-2.5 grid grid-cols-[16px_minmax(0,1fr)] gap-3">
             <I className={`w-3.5 h-3.5 shrink-0 ${l.kind === "verified" ? "text-success" : "text-muted-foreground"}`} />
-            <span className="flex-1 min-w-0 text-[12px] text-foreground truncate">{l.text}</span>
-            <span className="text-[11px] text-muted-foreground shrink-0">{l.at}</span>
+            <span className="min-w-0 text-[12px] text-foreground break-words">{l.text}</span>
+            <span className="col-start-2 text-[11px] text-muted-foreground">{l.at}</span>
           </li>
         );
       })}
@@ -1179,19 +1074,19 @@ function BriefRow({ p }: { p: Product }) {
   const missing = [!p.author && "Who is the author?", !p.language && "Which language(s)?", (p.description ?? "").length < 50 && "What makes this book worth reading? (your words)"].filter(Boolean) as string[];
   return (
     <li className="px-4 sm:px-5 py-4">
-      <button onClick={() => setOpen(!open)} className="w-full flex items-start gap-3 text-left">
+      <Button variant="ghost" onClick={() => setOpen(!open)} className="w-full flex items-start gap-3 text-left">
         <Sparkles className="w-4 h-4 text-muted-foreground mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-[13px] text-foreground">Product page: {p.name}</p>
           <p className="text-[12px] text-muted-foreground">{missing.length ? `${missing.length} questions before drafting` : "Ready to draft"}</p>
         </div>
         <ChevronRight className={`w-4 h-4 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`} />
-      </button>
+      </Button>
       {open && (
         <div className="mt-3 ml-7 space-y-2 text-[12px]">
           <p className="text-muted-foreground">Known facts: {p.category} · {p.variants.map((v) => v.name).join(", ")} · from ₹{Math.min(...p.variants.map((v) => v.price), p.basePrice)}</p>
           {missing.map((q) => <p key={q} className="text-foreground">? {q}</p>)}
-          <button onClick={() => toast("Draft generation is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Draft from facts</button>
+          <Button variant="ghost" onClick={() => toast("Draft generation is part of the full build")} className="h-8 px-3 rounded-md border border-border text-[12px] text-foreground">Draft from facts</Button>
         </div>
       )}
     </li>

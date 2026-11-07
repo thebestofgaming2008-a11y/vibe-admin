@@ -9,6 +9,10 @@ export const Route = createFileRoute("/discounts")({
     meta: [
       { title: "Discounts — Store Management" },
       { name: "description", content: "Create and manage discount codes" },
+      { property: "og:title", content: "Discounts — Store Management" },
+      { property: "og:description", content: "Create and manage discount codes" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
 });
