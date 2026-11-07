@@ -150,3 +150,22 @@
 .animate-fade-in-delay-2 { animation: fade-in 0.35s ease-out 0.08s both; }
 .animate-fade-in-delay-3 { animation: fade-in 0.35s ease-out 0.12s both; }
 .animate-fade-in-delay-4 { animation: fade-in 0.35s ease-out 0.16s both; }
+
+.seo-workspace { letter-spacing: 0; }
+.seo-workspace button { flex-shrink: 0; }
+.seo-workspace button.w-full { height: auto; white-space: normal; justify-content: start; }
+.seo-workspace p, .seo-workspace h3 { overflow-wrap: anywhere; }
+.seo-steps li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: calc(50% + 20px);
+  width: calc(100% - 32px);
+  border-top: 1px solid var(--border);
+}
+@media (max-width: 639px) {
+  .seo-workspace li > span.whitespace-nowrap { white-space: normal; max-width: 100px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
