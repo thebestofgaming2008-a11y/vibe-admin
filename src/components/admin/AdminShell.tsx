@@ -6,9 +6,10 @@ interface AdminShellProps {
   title?: string;
   subtitle?: string;
   children: ReactNode;
+  mainClassName?: string;
 }
 
-export function AdminShell({ title, subtitle, children }: AdminShellProps) {
+export function AdminShell({ title, subtitle, children, mainClassName = "" }: AdminShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -22,7 +23,7 @@ export function AdminShell({ title, subtitle, children }: AdminShellProps) {
           onMenuClick={() => setMobileOpen(true)}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto">
+        <main className={`flex-1 p-4 sm:p-6 lg:p-8 space-y-6 overflow-y-auto ${mainClassName}`}>
           {children}
         </main>
       </div>
